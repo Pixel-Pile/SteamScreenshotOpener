@@ -1,24 +1,10 @@
-﻿using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using System.Web;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using CommunityToolkit.Mvvm.Input;
 
 namespace SteamScreenshotViewer;
 
@@ -51,6 +37,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         TaskScheduler.UnobservedTaskException += Rethrow;
         InitializeComponent();
+        SubmitBaseUrlCommand = new(HandleBasePathSubmitted);
         DataContext = this;
     }
 
@@ -66,12 +53,22 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         StartIfBasePathKnown();
     }
 
+    public static readonly DependencyProperty BasePathProperty = DependencyProperty.Register(
+        nameof(BasePath), typeof(string), typeof(MainWindow), new PropertyMetadata(default(string)));
 
-    private void HandleBasePathSubmitted(object sender, RoutedEventArgs e)
+    public string BasePath
+    {
+        get { return (string)GetValue(BasePathProperty); }
+        set { SetValue(BasePathProperty, value); }
+    }
+
+    public RelayCommand SubmitBaseUrlCommand { get; set; }
+
+    private void HandleBasePathSubmitted()
     {
         Config config = Config.CreateEmpty();
 
-        string gameSpecificScreenshotPath = TextBoxBasePath.Text;
+        string gameSpecificScreenshotPath = BasePath;
         if (string.IsNullOrEmpty(gameSpecificScreenshotPath))
         {
             MessageBox.Show("base path cannot be empty");

@@ -1,0 +1,40 @@
+﻿<Window x:Class="SteamScreenshotViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SteamScreenshotViewer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        FontSize="16">
+
+    <DockPanel>
+        <!-- <Grid.RowDefinitions> -->
+        <!--     <RowDefinition Height="Auto" /> -->
+        <!--     <RowDefinition Height="Auto" /> -->
+        <!-- </Grid.RowDefinitions> -->
+        <DockPanel DockPanel.Dock="Top" Grid.Row="0" x:Name="PanelEnterBasePath" Visibility="Collapsed" HorizontalAlignment="Stretch">
+
+            <Button x:Name="ButtonSubmitBasePath" DockPanel.Dock="Right" VerticalAlignment="Center"
+                    Content="Set base path" Click="HandleBasePathSubmitted" />
+            <StackPanel Orientation="Vertical" Margin="20">
+                <TextBlock
+                    Text="enter full path to the screenshot directory of any game (you will only have to do this once)" />
+                <TextBox x:Name="TextBoxBasePath" Margin="0,10,0,0" />
+            </StackPanel>
+        </DockPanel>
+        <ListView 
+                  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=local:MainWindow}, Path=SteamApps}">
+            <ListView.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:SteamApp}">
+                    <TextBlock Text="{Binding Path=Name}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <ListView.Resources>
+                <Style TargetType="ListViewItem">
+                    <EventSetter Event="MouseDoubleClick" Handler="OnAppClick" />
+                </Style>
+            </ListView.Resources>
+        </ListView>
+    </DockPanel>
+</Window>

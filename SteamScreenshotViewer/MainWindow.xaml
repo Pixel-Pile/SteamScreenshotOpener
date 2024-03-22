@@ -4,35 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SteamScreenshotViewer"
-        xmlns:ctrl="clr-namespace:SteamScreenshotViewer.Controls"
+        xmlns:markupExtensions="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
-        FontSize="16">
+        FontSize="16"
+        SizeToContent="WidthAndHeight">
     <Window.Resources>
         <Style TargetType="local:MainWindow">
             <Setter Property="BasePath" Value="{Binding ElementName=BasePathControl, Path=TextBox.Text}">
             </Setter>
         </Style>
     </Window.Resources>
-
-    <DockPanel>
-        <Grid DockPanel.Dock="Top" x:Name="PanelEnterBasePath" Visibility="Collapsed"
-              HorizontalAlignment="Stretch">
-            <ctrl:TextBoxWithSubmitButton x:Name="BasePathControl"
-                                              SubmitButtonCommand="{Binding SubmitBaseUrlCommand}" />
-        </Grid>
-        <ListView
-            ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=local:MainWindow}, Path=SteamApps}">
-            <ListView.ItemTemplate>
-                <DataTemplate DataType="{x:Type local:SteamApp}">
-                    <TextBlock Text="{Binding Path=Name}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-            <ListView.Resources>
-                <Style TargetType="ListViewItem">
-                    <EventSetter Event="MouseDoubleClick" Handler="OnAppClick" />
-                </Style>
-            </ListView.Resources>
-        </ListView>
-    </DockPanel>
+    <ContentPresenter Content="{markupExtensions:AncestorBinding Type=local:MainWindow, Path=CurrentView}" />
 </Window>

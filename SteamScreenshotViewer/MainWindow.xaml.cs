@@ -1,45 +1,116 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using SteamScreenshotViewer.Model;
+using SteamScreenshotViewer.Views;
 
 namespace SteamScreenshotViewer;
+
+public enum View
+{
+    Error,
+    Apps,
+    BasePathDialog,
+    UnresolvedApps,
+    Loading
+}
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : Window, INotifyPropertyChanged
+public partial class MainWindow : Window
 {
-    private ICollection<SteamApp> _steamApps;
-
-    public ICollection<SteamApp> SteamApps
-    {
-        get => _steamApps;
-        set
-        {
-            _steamApps = value;
-            NotifyPropertyChanged();
-        }
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-
     public MainWindow()
     {
         TaskScheduler.UnobservedTaskException += Rethrow;
+        gameResolver.AutoResolveFinished += HandleAutoResolveFinished;
+        gameResolver.AppsFullyResolved += HandleAppsFullyResolved;
         InitializeComponent();
-        SubmitBaseUrlCommand = new(HandleBasePathSubmitted);
-        DataContext = this;
     }
+
+
+    private GameResolver gameResolver = new();
+
+    public static readonly DependencyProperty CurrentViewProperty = DependencyProperty.Register(
+        nameof(CurrentView), typeof(Control), typeof(MainWindow), new PropertyMetadata(default(Control)));
+
+    public Control CurrentView
+    {
+        get { return (Control)GetValue(CurrentViewProperty); }
+        set { SetValue(CurrentViewProperty, value); }
+    }
+
+    private void HandleAutoResolveFinished()
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            Thread.MemoryBarrier();
+            if (gameResolver.UnresolvedApps.Count == 0)
+            {
+                DisplayView(View.Apps);
+            }
+            else
+            {
+                DisplayView(View.UnresolvedApps);
+            }
+        });
+    }
+
+    private void HandleAppsFullyResolved()
+    {
+        Application.Current.Dispatcher.Invoke(() => DisplayView(View.Apps));
+    }
+
+    public void DisplayView(View view)
+    {
+        switch (view)
+        {
+            case View.Apps:
+                LoadAppsView();
+                break;
+            case View.BasePathDialog:
+                LoadBasePathDialogView();
+                break;
+            case View.UnresolvedApps:
+                LoadUnresolvedAppsView();
+                break;
+            case View.Loading:
+                LoadLoadingScreenView();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(view), view,
+                    "attempted to load a view that does not exist");
+        }
+    }
+
+    private void LoadLoadingScreenView()
+    {
+        ViewLoadingScreen view = new();
+        view.GameResolver = gameResolver;
+        CurrentView = view;
+    }
+
+    private void LoadUnresolvedAppsView()
+    {
+        ViewUnresolvedApps view = new();
+        view.GameResolver = gameResolver;
+        CurrentView = view;
+    }
+
+    private void LoadBasePathDialogView()
+    {
+        ViewBasePathDialog basePathDialog = new();
+        basePathDialog.SubmitButtonCommand = new RelayCommand<string>(HandleGameSpecificPathSubmitted);
+        CurrentView = basePathDialog;
+    }
+
+    private void LoadAppsView()
+    {
+        ViewApps view = new();
+        view.GameResolver = gameResolver;
+        CurrentView = view;
+    }
+
 
     private void Rethrow(object? sender, UnobservedTaskExceptionEventArgs e)
     {
@@ -50,7 +121,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     protected override void OnInitialized(EventArgs e)
     {
         base.OnInitialized(e);
-        StartIfBasePathKnown();
+        Start();
     }
 
     public static readonly DependencyProperty BasePathProperty = DependencyProperty.Register(
@@ -62,54 +133,34 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         set { SetValue(BasePathProperty, value); }
     }
 
-    public RelayCommand SubmitBaseUrlCommand { get; set; }
 
-    private void HandleBasePathSubmitted()
+    private void HandleGameSpecificPathSubmitted(string gameSpecificScreenshotPath)
     {
-        Config config = Config.CreateEmpty();
-
-        string gameSpecificScreenshotPath = BasePath;
-        if (string.IsNullOrEmpty(gameSpecificScreenshotPath))
-        {
-            MessageBox.Show("base path cannot be empty");
-            return;
-        }
-
-        if (!System.IO.Path.Exists(gameSpecificScreenshotPath))
-        {
-            MessageBox.Show("path does not exist: " + gameSpecificScreenshotPath);
-            return;
-        }
-
-        PanelEnterBasePath.Visibility = Visibility.Collapsed;
+        Config config = new Config();
         config.ScreenshotBasePath = ResolveBasePath(gameSpecificScreenshotPath);
-        config.Commit();
+        config.StoreAndSerialize();
+        DisplayView(View.Loading);
         Task.Run(LoadAppList);
     }
 
-    private void StartIfBasePathKnown()
+    private void Start()
     {
         if (!Config.Exists())
         {
-            AskForBasePath();
+            DisplayView(View.BasePathDialog);
             return;
         }
 
+        DisplayView(View.Loading);
         Task.Run(LoadAppList);
     }
 
     private async Task LoadAppList()
     {
-        GameResolver resolver = new GameResolver();
-        SteamApp[] apps = await resolver.FindGameDirectories();
-        Array.Sort(apps, (app1, app2) => app1.Name.CompareTo(app2.Name));
-        SteamApps = apps;
+        gameResolver.SearchApps();
+        await gameResolver.ResolveAppNames();
     }
 
-    private void AskForBasePath()
-    {
-        PanelEnterBasePath.Visibility = Visibility.Visible;
-    }
 
     private string ResolveBasePath(string pathToASpecificGamesScreenshots)
     {
@@ -134,13 +185,5 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
 
         return pathToASpecificGamesScreenshots.Substring(0, i);
-    }
-
-    private void OnAppClick(object sender, MouseButtonEventArgs e)
-    {
-        if ((sender as ListViewItem)?.Content is SteamApp steamApp)
-        {
-            Process.Start("explorer.exe", steamApp.ScreenshotsPath);
-        }
     }
 }

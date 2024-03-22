@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="SteamScreenshotViewer.Views.ViewLoadingScreen"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:SteamScreenshotViewer.Views"
+             xmlns:markupExtensions="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <StackPanel>
+        <TextBlock
+            Text="{markupExtensions:AncestorBinding Type=local:ViewLoadingScreen, Path=GameResolver.TotalAppCount}" />
+        <TextBlock
+            Text="{markupExtensions:AncestorBinding Type=local:ViewLoadingScreen, Path=GameResolver.ObservedResolvedApps.Count}" />
+        <TextBlock
+            Text="{markupExtensions:AncestorBinding Type=local:ViewLoadingScreen, Path=GameResolver.ObservedUnresolvedApps.Count}" />
+    </StackPanel>
+</UserControl>

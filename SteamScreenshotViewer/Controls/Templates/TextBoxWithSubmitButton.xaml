@@ -1,8 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:ctrl="clr-namespace:SteamScreenshotViewer.Controls"
-                    xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions">
-    <Style TargetType="{x:Type ctrl:TextBoxWithSubmitButton}">
+                    xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
+                    xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code">
+    <Style TargetType="{x:Type code:TextBoxWithSubmitButton}">
         <Style.Setters>
             <Setter Property="Prompt">
                 <Setter.Value>
@@ -19,7 +20,7 @@
                 <Setter.Value>
                     <Button DockPanel.Dock="Right" VerticalAlignment="Center"
                             Content="Set base path"
-                            Command="{me:AncestorBinding Type={x:Type ctrl:TextBoxWithSubmitButton}, Path=SubmitButtonCommand}" />
+                            Command="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton}, Path=SubmitButtonCommandInternal}" />
                 </Setter.Value>
             </Setter>
             <Setter Property="Template">
@@ -27,14 +28,14 @@
                     <ControlTemplate>
                         <StackPanel Orientation="Horizontal">
                             <StackPanel Orientation="Vertical" Margin="20">
-                                <ContentControl
-                                    Content="{me:AncestorBinding Type={x:Type ctrl:TextBoxWithSubmitButton }, Path=Prompt}" />
-                                <ContentControl
-                                    Content="{me:AncestorBinding Type={x:Type ctrl:TextBoxWithSubmitButton }, Path=TextBox}" />
+                                <ContentPresenter
+                                    Content="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton }, Path=Prompt}" />
+                                <ContentPresenter
+                                    Content="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton }, Path=TextBox}" />
 
                             </StackPanel>
-                            <ContentControl
-                                Content="{me:AncestorBinding Type={x:Type ctrl:TextBoxWithSubmitButton }, Path=SubmitButton}" />
+                            <ContentPresenter
+                                Content="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton }, Path=SubmitButton}" />
                         </StackPanel>
                     </ControlTemplate>
                 </Setter.Value>

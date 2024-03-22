@@ -1,29 +1,24 @@
-﻿using System.IO;
+﻿using System.Collections.Concurrent;
+using System.IO;
 using System.Text.Json;
 
 namespace SteamScreenshotViewer;
 
-public static class Cache
+public class Cache
 {
-    private const string cachePath = @"plumbing/cache.json";
+    public const string cachePath = @"plumbing/cache.json";
 
-    public static Dictionary<string, string> LoadIds()
+    public static Cache Instance => Exists() ? SerializedSingletonRegistry.Load<Cache>() : new Cache();
+
+    public ConcurrentDictionary<string, string> NamesByAppId { get; set; } = new();
+
+    public void StoreAndSerialize()
     {
-        if (Path.Exists(cachePath))
-        {
-            string json = File.ReadAllText(cachePath);
-            return JsonSerializer.Deserialize<Dictionary<string, string>>(json)
-                   ?? throw new JsonException("could not load cache file");
-        }
-
-        return new Dictionary<string, string>();
+        SerializedSingletonRegistry.StoreAndSerialize<Cache>(this, true);
     }
 
-    public static void StoreIds(Dictionary<string, string> cachedNamesToIds)
+    public static bool Exists()
     {
-        string data = JsonSerializer.Serialize(cachedNamesToIds);
-
-        // remember that this writes to debug/release directory and is not visible in ide
-        File.WriteAllText(cachePath, data);
+        return Path.Exists(cachePath);
     }
 }

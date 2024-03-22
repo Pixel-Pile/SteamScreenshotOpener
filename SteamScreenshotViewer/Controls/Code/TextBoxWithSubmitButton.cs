@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Input;
 
-namespace SteamScreenshotViewer.Controls;
+namespace SteamScreenshotViewer.Controls.Code;
 
 public class TextBoxWithSubmitButton : Control
 {
@@ -12,13 +12,37 @@ public class TextBoxWithSubmitButton : Control
             new FrameworkPropertyMetadata(typeof(TextBoxWithSubmitButton)));
     }
 
-    public static readonly DependencyProperty SubmitButtonCommandProperty = DependencyProperty.Register(
-        nameof(SubmitButtonCommand), typeof(RelayCommand), typeof(TextBoxWithSubmitButton),
+    public TextBoxWithSubmitButton()
+    {
+        SubmitButtonCommandInternal = new RelayCommand(ExecuteCommandWithTextBoxText);
+        SubmitButtonCommand = new RelayCommand<string>(s => { });
+    }
+
+
+    private void ExecuteCommandWithTextBoxText()
+    {
+        SubmitButtonCommand.Execute(TextBox.Text);
+    }
+
+    public static readonly DependencyProperty SubmitButtonCommandInternalProperty = DependencyProperty.Register(
+        nameof(SubmitButtonCommandInternal), typeof(RelayCommand), typeof(TextBoxWithSubmitButton),
         new PropertyMetadata(default(RelayCommand)));
 
-    public RelayCommand SubmitButtonCommand
+    public RelayCommand SubmitButtonCommandInternal
     {
-        get { return (RelayCommand)GetValue(SubmitButtonCommandProperty); }
+        get { return (RelayCommand)GetValue(SubmitButtonCommandInternalProperty); }
+        set { SetValue(SubmitButtonCommandInternalProperty, value); }
+    }
+
+
+    public static readonly DependencyProperty SubmitButtonCommandProperty = DependencyProperty.Register(
+        nameof(SubmitButtonCommand), typeof(RelayCommand<string>), typeof(TextBoxWithSubmitButton),
+        new PropertyMetadata(default(RelayCommand<string>)));
+
+
+    public RelayCommand<string> SubmitButtonCommand
+    {
+        get { return (RelayCommand<string>)GetValue(SubmitButtonCommandProperty); }
         set { SetValue(SubmitButtonCommandProperty, value); }
     }
 

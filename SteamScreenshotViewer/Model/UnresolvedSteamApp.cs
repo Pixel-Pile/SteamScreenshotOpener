@@ -85,7 +85,7 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     {
         try
         {
-            string? name = await _resolver.GetAppNameAsync(this.Id);
+            string? name = await SteamApiClient.GetAppNameAsync(this.Id);
             if (name is not null)
             {
                 NameCandidate = name;

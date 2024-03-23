@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
-using System.Text.Json.Nodes;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -22,17 +21,14 @@ public partial class GameResolver : ObservableObject
 
     public ICollection<ResolvedSteamApp> ResolvedApps = new List<ResolvedSteamApp>();
     public ICollection<UnresolvedSteamApp> UnresolvedApps = new List<UnresolvedSteamApp>();
-    private List<ISteamApp> apps = new();
     private List<string> knownDuplicateNames = new();
 
-    //FIXME when to instantiate and dispose HttpClient
-    HttpClient httpClient = new();
 
-
-    public ICollection<ISteamApp> SearchApps()
+    private List<ISteamApp> SearchApps()
     {
-        apps = new();
-        foreach (string path in Directory.EnumerateDirectories(Config.Instance.ScreenshotBasePath))
+        string[] screenshotPaths = Directory.EnumerateDirectories(Config.Instance.ScreenshotBasePath).ToArray();
+        List<ISteamApp> apps = new(screenshotPaths.Count());
+        foreach (string path in screenshotPaths)
         {
             string appId = GetAppIdFromScreenshotDirectoryPath(path);
             apps.Add(new SteamApp(appId, path + @"\screenshots"));
@@ -42,25 +38,11 @@ public partial class GameResolver : ObservableObject
         return apps;
     }
 
-    public async Task ResolveAppNames()
+    public async Task SearchAndResolveApps()
     {
-        ConcurrentDictionary<string, string> cachedNamesByIdCopy = Cache.Instance.NamesByAppId;
-        foreach (ISteamApp app in apps)
-        {
-            if (cachedNamesByIdCopy.ContainsKey(app.Id))
-            {
-                // cached
-                ResolvedSteamApp resolvedApp = new ResolvedSteamApp(app, cachedNamesByIdCopy[app.Id]);
-                AddResolvedAppCandidate(resolvedApp, false);
-                Console.WriteLine($"already cached: {resolvedApp}");
-            }
-            else
-            {
-                //not cached
-                await AutoResolveApp(app);
-            }
-        }
-
+        List<ISteamApp> apps = SearchApps();
+        ConcurrentDownloader concurrentDownloader = new ConcurrentDownloader(this, apps);
+        await concurrentDownloader.ResolveAppNames();
         Thread.MemoryBarrier();
         AutoResolveFinished?.Invoke();
         if (UnresolvedApps.Count == 0)
@@ -69,6 +51,20 @@ public partial class GameResolver : ObservableObject
         }
 
         Cache.Instance.PostAndSerialize();
+    }
+
+    public bool TryResolveCached(ISteamApp app, ConcurrentDictionary<string, string> cachedNamesById)
+    {
+        if (cachedNamesById.TryGetValue(app.Id, out string? name))
+        {
+            // cached
+            ResolvedSteamApp resolvedApp = new ResolvedSteamApp(app, name);
+            AddResolvedAppCandidate(resolvedApp, false);
+            Console.WriteLine($"already cached: {resolvedApp}");
+            return true;
+        }
+
+        return false;
     }
 
     private void HandleUnresolvedApp(UnresolvedSteamApp unresolvedApp)
@@ -172,12 +168,10 @@ public partial class GameResolver : ObservableObject
     }
 
 
-    public async Task AutoResolveApp(ISteamApp app)
+    public void HandleApiResponse(ISteamApp app, string? name)
     {
         try
         {
-            string? name = await GetAppNameAsync(app.Id);
-
             if (name is null)
             {
                 HandleUnresolvedApp(new UnresolvedSteamApp(app, FailureCause.SteamApi, this));
@@ -195,28 +189,6 @@ public partial class GameResolver : ObservableObject
         }
     }
 
-    public async Task<string?> GetAppNameAsync(string appId)
-    {
-        string? response = null;
-        try
-        {
-            response = await httpClient.GetStringAsync(
-                $"https://store.steampowered.com/api/appdetails??filter=basic&appids={appId}");
-        }
-        catch (TaskCanceledException timeout)
-        {
-            throw new HttpRequestException("request failed due to timeout", timeout);
-        }
-
-        JsonNode responseJson = JsonObject.Parse(response)[appId];
-        if (responseJson["success"].ToString() == "false")
-        {
-            return null;
-        }
-
-        JsonNode appData = responseJson["data"];
-        return appData["name"].ToString();
-    }
 
     private string GetAppIdFromScreenshotDirectoryPath(string directory)
     {
@@ -232,7 +204,8 @@ public partial class GameResolver : ObservableObject
 
     private void UpdateAutoResolveProgress()
     {
-        AutoResolvingProgress = ObservedResolvedApps.Count * 100 / (double)(TotalAppCount - ObservedUnresolvedApps.Count);
+        AutoResolvingProgress =
+            ObservedResolvedApps.Count * 100 / (double)(TotalAppCount - ObservedUnresolvedApps.Count);
     }
 
     private void RemoveUnresolved(UnresolvedSteamApp unresolvedApp)

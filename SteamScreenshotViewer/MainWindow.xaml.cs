@@ -148,8 +148,7 @@ public partial class MainWindow : Window
 
     private async Task LoadAppList()
     {
-        gameResolver.SearchApps();
-        await gameResolver.ResolveAppNames();
+        await gameResolver.SearchAndResolveApps();
     }
 
 

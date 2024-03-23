@@ -5,98 +5,129 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:SteamScreenshotViewer.Views"
              xmlns:model="clr-namespace:SteamScreenshotViewer.Model"
-             xmlns:steamScreenshotViewer="clr-namespace:SteamScreenshotViewer"
              xmlns:converter="clr-namespace:SteamScreenshotViewer.Converter"
-             xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="300"
+             FontSize="{StaticResource GlobalFontSize}">
     <UserControl.Resources>
         <converter:TriStateConverter x:Key="TriStateConverter" />
     </UserControl.Resources>
-    <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
-            <TextBlock>Resolve Name Conflicts</TextBlock>
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Margin="0,8,0,16">
+            <TextBlock FontSize="24" Margin="0,0,0,8">Resolve App Names</TextBlock>
+            <TextBlock>
+                <Run Text="Failed to resolve names for" />
+                <Run
+                    Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Mode=OneWay, Path=GameResolver.ObservedUnresolvedApps.Count}" />
+                <Run Text="apps automatically." />
+                <LineBreak />
+                <Run Text="Resolve names manually by entering them in the table below and committing." />
+            </TextBlock>
         </StackPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Vertical">
             <Button Content="Commit all resolved names" Click="CommitAll" />
         </StackPanel>
-        <DataGrid HorizontalAlignment="Center" VerticalAlignment="Top"
-                  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Path=GameResolver.ObservedUnresolvedApps}"
-                  AutoGenerateColumns="False"
-                  RowEditEnding="DataGrid_OnRowEditEnding"
-                  CanUserDeleteRows="False">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Name">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="{x:Type model:UnresolvedSteamApp}">
-                            <TextBox Text="{Binding NameCandidate, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                     LostFocus="OnNameEdited">
-                                <TextBox.Style>
-                                    <Style TargetType="TextBox">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding NameCandidateValid}" Value="True">
-                                                <Setter Property="Background" Value="Green" />
-                                            </DataTrigger>
+        <ListView FontSize="{StaticResource GlobalFontSize}"
+                  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Path=GameResolver.ObservedUnresolvedApps}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignGridViewItem}">
+                    <!-- <Setter Property="Padding" Value="4"/> -->
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="TextBlock.TextAlignment" Value="Center" />
+                </Style>
 
-                                            <DataTrigger Binding="{Binding NameCandidateValid}" Value="False">
-                                                <Setter Property="Background" Value="Brown" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBox.Style>
-                            </TextBox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True" Header="Id" Binding="{Binding Id}" />
-                <DataGridTextColumn IsReadOnly="True" Header="FailureCause" Binding="{Binding FailureCause}" />
-                <DataGridTemplateColumn>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="Commit" Click="Commit"
-                                    IsEnabled="{Binding NameCandidateValid, Converter={StaticResource TriStateConverter}}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button
-                                Command="{Binding RetrySteamApiCommand}">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Content" Value="{Binding DescriptionRetrySteamApi}" />
-                                        <Style.Triggers>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter Property="Content" Value="SteamApi already queried" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView AllowsColumnReorder="false">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader"
+                               BasedOn="{StaticResource {x:Type GridViewColumnHeader}}">
+                            <Setter Property="Padding" Value="12,4,4,4" />
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="TextBlock.TextAlignment" Value="Center" />
 
-                <DataGridTemplateColumn>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="{Binding DescriptionSteamDb}"
-                                    Command="{Binding SearchOnSteamDbCommand}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
 
-                <DataGridTemplateColumn>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="{Binding DescriptionOpenFolder}"
-                                    Command="{Binding OpenScreenshotFolderCommand}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+                    <GridViewColumn Header="Name">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type model:UnresolvedSteamApp}">
+                                <TextBox Text="{Binding NameCandidate, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                         LostFocus="OnNameEdited" MinWidth="250">
+                                    <!-- VerticalAlignment="Center" HorizontalAlignment="Center"> -->
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding NameCandidateValid}" Value="True">
+                                                    <Setter Property="Background" Value="Green" />
+                                                </DataTrigger>
+
+                                                <DataTrigger Binding="{Binding NameCandidateValid}" Value="False">
+                                                    <Setter Property="Background" Value="Brown" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Header="FailureCause" DisplayMemberBinding="{Binding FailureCause}" />
+
+                    <GridViewColumn>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type model:UnresolvedSteamApp}">
+                                <Button Content="Commit" Click="Commit"
+                                        IsEnabled="{Binding NameCandidateValid, Converter={StaticResource TriStateConverter}}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type model:UnresolvedSteamApp}">
+                                <Button
+                                    Command="{Binding RetrySteamApiCommand}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                            <Setter Property="Content" Value="{Binding DescriptionRetrySteamApi}" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Content" Value="SteamApi already queried" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type model:UnresolvedSteamApp}">
+                                <Button Content="{Binding DescriptionSteamDb}"
+                                        Command="{Binding SearchOnSteamDbCommand}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type model:UnresolvedSteamApp}">
+                                <Button Content="{Binding DescriptionOpenFolder}"
+                                        Command="{Binding OpenScreenshotFolderCommand}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+
+            </ListView.View>
+
+        </ListView>
     </DockPanel>
 </UserControl>

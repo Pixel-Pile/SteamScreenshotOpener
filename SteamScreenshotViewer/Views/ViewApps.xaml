@@ -8,23 +8,27 @@
              xmlns:model="clr-namespace:SteamScreenshotViewer.Model"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
-             MaxHeight="500">
-        <DockPanel>
-            <TextBlock DockPanel.Dock="Top">
-                App List
-            </TextBlock>
-            <ListView
-                ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=GameResolver.ObservedResolvedApps}">
-                <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type model:ResolvedSteamApp}">
-                        <TextBlock Text="{Binding Path=Name}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-                <ListView.Resources>
-                    <Style TargetType="ListViewItem">
-                        <EventSetter Event="MouseDoubleClick" Handler="OnAppClick" />
-                    </Style>
-                </ListView.Resources>
-            </ListView>
-        </DockPanel>
+             MaxHeight="500"
+             FontSize="{StaticResource GlobalFontSize}">
+
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Margin="0,8,0,16">
+            <TextBlock FontSize="24" Margin="0,0,0,8">Steam Apps</TextBlock>
+            <TextBlock Text="Open screenshot Folder by double clicking" />
+        </StackPanel>
+
+        <ListView MouseDoubleClick="OnAppClick"
+            ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=GameResolver.ObservedResolvedApps}">
+            <ListView.ItemTemplate>
+                <DataTemplate DataType="{x:Type model:ResolvedSteamApp}">
+                    <TextBlock Text="{Binding Path=Name}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <!-- <ListView.Resources> -->
+            <!--     <Style TargetType="ListViewItem"> -->
+            <!--         <EventSetter Event="MouseDoubleClick" Handler="OnAppClick" /> -->
+            <!--     </Style> -->
+            <!-- </ListView.Resources> -->
+        </ListView>
+    </DockPanel>
 </UserControl>

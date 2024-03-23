@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace SteamScreenshotViewer.Controls.Code;
@@ -47,15 +48,6 @@ public class TextBoxWithSubmitButton : Control
     }
 
 
-    public static readonly DependencyProperty PromptProperty = DependencyProperty.Register(
-        nameof(Prompt), typeof(TextBlock), typeof(TextBoxWithSubmitButton), new PropertyMetadata(default(TextBlock)));
-
-    public TextBlock Prompt
-    {
-        get { return (TextBlock)GetValue(PromptProperty); }
-        set { SetValue(PromptProperty, value); }
-    }
-
 
     public static readonly DependencyProperty TextBoxProperty = DependencyProperty.Register(
         nameof(TextBox), typeof(TextBox), typeof(TextBoxWithSubmitButton), new PropertyMetadata(default(TextBox)));
@@ -73,5 +65,14 @@ public class TextBoxWithSubmitButton : Control
     {
         get { return (Button)GetValue(SubmitButtonProperty); }
         set { SetValue(SubmitButtonProperty, value); }
+    }
+
+    public static readonly DependencyProperty ErrorMessageProperty = DependencyProperty.Register(
+        nameof(ErrorMessage), typeof(string), typeof(TextBoxWithSubmitButton), new PropertyMetadata(default(string)));
+
+    public string ErrorMessage
+    {
+        get { return (string)GetValue(ErrorMessageProperty); }
+        set { SetValue(ErrorMessageProperty, value); }
     }
 }

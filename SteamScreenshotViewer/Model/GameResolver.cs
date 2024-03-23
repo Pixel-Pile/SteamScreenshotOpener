@@ -16,6 +16,7 @@ public partial class GameResolver : ObservableObject
     public ObservableCollection<UnresolvedSteamApp> ObservedUnresolvedApps { get; set; } = new();
 
     [ObservableProperty] private int totalAppCount;
+    [ObservableProperty] private double autoResolvingProgress;
     public event Action? AutoResolveFinished;
     public event Action? AppsFullyResolved;
 
@@ -229,6 +230,11 @@ public partial class GameResolver : ObservableObject
         return id;
     }
 
+    private void UpdateAutoResolveProgress()
+    {
+        AutoResolvingProgress = ObservedResolvedApps.Count * 100 / (double)(TotalAppCount - ObservedUnresolvedApps.Count);
+    }
+
     private void RemoveUnresolved(UnresolvedSteamApp unresolvedApp)
     {
         UnresolvedApps.Remove(unresolvedApp);
@@ -244,14 +250,22 @@ public partial class GameResolver : ObservableObject
     private void RemoveResolved(ResolvedSteamApp resolvedApp)
     {
         ResolvedApps.Remove(resolvedApp);
-        Application.Current.Dispatcher.Invoke(() => ObservedResolvedApps.Remove(resolvedApp));
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            ObservedResolvedApps.Remove(resolvedApp);
+            UpdateAutoResolveProgress();
+        });
     }
+
 
     private void AddResolved(ResolvedSteamApp resolvedApp, bool addToCache)
     {
         ResolvedApps.Add(resolvedApp);
-        Application.Current.Dispatcher.Invoke(() => ObservedResolvedApps.Add(resolvedApp));
-
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            ObservedResolvedApps.Add(resolvedApp);
+            UpdateAutoResolveProgress();
+        });
         if (addToCache)
         {
             if (!Cache.Instance.NamesByAppId.TryAdd(resolvedApp.Id, resolvedApp.Name))

@@ -6,14 +6,8 @@
         xmlns:local="clr-namespace:SteamScreenshotViewer"
         xmlns:markupExtensions="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
-        FontSize="16"
-        SizeToContent="WidthAndHeight">
-    <Window.Resources>
-        <Style TargetType="local:MainWindow">
-            <Setter Property="BasePath" Value="{Binding ElementName=BasePathControl, Path=TextBox.Text}">
-            </Setter>
-        </Style>
-    </Window.Resources>
+        Title="MainWindow" MinHeight="450" MinWidth="800"
+        SizeToContent="WidthAndHeight"
+        Style="{StaticResource MaterialDesignWindow}">
     <ContentPresenter Content="{markupExtensions:AncestorBinding Type=local:MainWindow, Path=CurrentView}" />
 </Window>

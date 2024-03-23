@@ -5,15 +5,9 @@
                     xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code">
     <Style TargetType="{x:Type code:TextBoxWithSubmitButton}">
         <Style.Setters>
-            <Setter Property="Prompt">
-                <Setter.Value>
-                    <TextBlock
-                        Text="enter full path to the screenshot directory of any game (you will only have to do this once)" />
-                </Setter.Value>
-            </Setter>
             <Setter Property="TextBox">
                 <Setter.Value>
-                    <TextBox Margin="0,10,0,0" />
+                    <TextBox HorizontalAlignment="Stretch" MinWidth="10"/>
                 </Setter.Value>
             </Setter>
             <Setter Property="SubmitButton">
@@ -26,16 +20,22 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel Orientation="Vertical" Margin="20">
-                                <ContentPresenter
-                                    Content="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton }, Path=Prompt}" />
-                                <ContentPresenter
-                                    Content="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton }, Path=TextBox}" />
+                        <StackPanel Orientation="Vertical">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Margin="0,8"  HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                  Content="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton }, Path=TextBox}" />
 
-                            </StackPanel>
-                            <ContentPresenter
-                                Content="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton }, Path=SubmitButton}" />
+                                <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                  Content="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton }, Path=SubmitButton}" />
+                                </Grid>
+                            <!-- </StackPanel> -->
+                            <TextBlock
+                                Foreground="Brown"
+                                Text="{me:AncestorBinding Type={x:Type code:TextBoxWithSubmitButton }, Path=ErrorMessage}" />
                         </StackPanel>
                     </ControlTemplate>
                 </Setter.Value>

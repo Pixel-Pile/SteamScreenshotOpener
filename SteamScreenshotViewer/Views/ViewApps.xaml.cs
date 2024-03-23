@@ -22,7 +22,7 @@ public partial class ViewApps : UserControl
 
     private void OnAppClick(object sender, MouseButtonEventArgs e)
     {
-        if ((sender as ListViewItem)?.Content is ISteamApp steamApp)
+        if (e.OriginalSource is FrameworkElement { DataContext: ResolvedSteamApp steamApp })
         {
             Process.Start("explorer.exe", steamApp.ScreenshotsPath);
         }

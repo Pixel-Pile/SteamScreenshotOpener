@@ -4,15 +4,26 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:SteamScreenshotViewer.Views"
-             xmlns:markupExtensions="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
+             xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
-    <StackPanel>
-        <TextBlock
-            Text="{markupExtensions:AncestorBinding Type=local:ViewLoadingScreen, Path=GameResolver.TotalAppCount}" />
-        <TextBlock
-            Text="{markupExtensions:AncestorBinding Type=local:ViewLoadingScreen, Path=GameResolver.ObservedResolvedApps.Count}" />
-        <TextBlock
-            Text="{markupExtensions:AncestorBinding Type=local:ViewLoadingScreen, Path=GameResolver.ObservedUnresolvedApps.Count}" />
+             d:DesignHeight="300" d:DesignWidth="300"
+             FontSize="{StaticResource GlobalFontSize}">
+    <StackPanel Margin="16" Orientation="Vertical" VerticalAlignment="Center">
+        <TextBlock HorizontalAlignment="Center">
+            <Run Text="Resolving App Names:" />
+            <Run
+                Text="{me:AncestorBinding Type=local:ViewLoadingScreen, Mode=OneWay,Path=GameResolver.ObservedResolvedApps.Count}" />
+            <Run Text="/" />
+            <Run
+                Text="{me:AncestorBinding Type=local:ViewLoadingScreen, Mode=OneWay,Path=GameResolver.TotalAppCount}" />
+        </TextBlock>
+        <ProgressBar Height="12" Margin="32,4" MinWidth="240"
+                     Value="{me:AncestorBinding Type=local:ViewLoadingScreen, Path=GameResolver.AutoResolvingProgress}">
+        </ProgressBar>
+        <TextBlock HorizontalAlignment="Center">
+            <Run Text="Failed Name Lookups: " />
+            <Run
+                Text="{me:AncestorBinding Type=local:ViewLoadingScreen, Mode=OneWay, Path=GameResolver.ObservedUnresolvedApps.Count}" />
+        </TextBlock>
     </StackPanel>
 </UserControl>

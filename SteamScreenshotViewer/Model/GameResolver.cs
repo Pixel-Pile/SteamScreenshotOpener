@@ -44,13 +44,13 @@ public partial class GameResolver : ObservableObject
 
     public async Task ResolveAppNames()
     {
-        ConcurrentDictionary<string, string> cachedNamesById = Cache.Instance.NamesByAppId;
+        ConcurrentDictionary<string, string> cachedNamesByIdCopy = Cache.Instance.NamesByAppId;
         foreach (ISteamApp app in apps)
         {
-            if (cachedNamesById.ContainsKey(app.Id))
+            if (cachedNamesByIdCopy.ContainsKey(app.Id))
             {
                 // cached
-                ResolvedSteamApp resolvedApp = new ResolvedSteamApp(app, cachedNamesById[app.Id]);
+                ResolvedSteamApp resolvedApp = new ResolvedSteamApp(app, cachedNamesByIdCopy[app.Id]);
                 AddResolvedAppCandidate(resolvedApp, false);
                 Console.WriteLine($"already cached: {resolvedApp}");
             }
@@ -68,7 +68,7 @@ public partial class GameResolver : ObservableObject
             AppsFullyResolved?.Invoke();
         }
 
-        Cache.Instance.StoreAndSerialize();
+        Cache.Instance.PostAndSerialize();
     }
 
     private void HandleUnresolvedApp(UnresolvedSteamApp unresolvedApp)
@@ -286,7 +286,7 @@ public partial class GameResolver : ObservableObject
                 AddResolved(resolvedApp, true);
                 if (UnresolvedApps.Count == 0)
                 {
-                    Cache.Instance.StoreAndSerialize();
+                    Cache.Instance.PostAndSerialize();
                     AppsFullyResolved?.Invoke();
                 }
 

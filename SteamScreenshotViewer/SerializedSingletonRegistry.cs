@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Text.Json;
 
 namespace SteamScreenshotViewer;
@@ -30,17 +32,26 @@ public class SerializedSingletonRegistry
     private static object dataStructuresLock = new();
     private static Dictionary<Type, object> InstancesByType = new();
 
-    public static T Load<T>()
+    /// <summary>
+    /// Loads the singleton instance of type T.
+    /// Returns false (and instance = null) if no instance was posted and the deserialization path for that type
+    /// does not exist.
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static bool TryGetInstance<T>([MaybeNullWhen(false)] out T instance) where T : class
     {
-        
         lock (_locksByType[typeof(T)]) // prevent multiple instantiiation of type T by concurrent access
         {
             string path;
             lock (dataStructuresLock) // protect data structures
             {
-                if (InstancesByType.TryGetValue(typeof(T), out object instance))
+                if (InstancesByType.TryGetValue(typeof(T), out object? objInstance))
                 {
-                    return (T)instance;
+                    Debug.Assert(objInstance is not null);
+                    instance = (T)objInstance;
+                    return true;
                 }
 
                 // get path before releasing data structure lock
@@ -48,20 +59,28 @@ public class SerializedSingletonRegistry
             } // data structure lock is released
 
             // deserialize while holding type lock 
+            if (!Path.Exists(path))
+            {
+                instance = null;
+                return false;
+            }
+
             T deserialized = Deserialize<T>(path);
 
             lock (dataStructuresLock) // protect data structure
             {
                 InstancesByType[typeof(T)] = deserialized;
-                return deserialized;
+                instance = deserialized;
+                return true;
             }
         } // release type lock
     }
 
-    public static void StoreAndSerialize<T>(T obj, bool allowAlreadyInstantiated = false)
+    public static void Post<T>(T obj, bool allowAlreadyInstantiated = false)
     {
-        string path = _pathsByType[typeof(T)];
-        lock (_locksByType[typeof(T)]) // prevent concurrent deserialization of same type
+        _ = obj ?? throw new NullReferenceException("null is not a valid singleton instance");
+
+        lock (_locksByType[typeof(T)]) // prevent concurrent serialization of same type
         {
             lock (dataStructuresLock)
             {
@@ -76,11 +95,22 @@ public class SerializedSingletonRegistry
                 // store instance while still holding data lock
                 InstancesByType[typeof(T)] = obj;
             }
-
-            Serialize<T>(path, obj); // serialize while holding type lock
         }
     }
 
+    public static void PostAndSerialize<T>(T obj, bool allowAlreadyInstantiated = false)
+    {
+        _ = obj ?? throw new NullReferenceException("null is not a valid singleton instance");
+
+        string path = _pathsByType[typeof(T)];
+        // lock type lock so store & serialize for a type cannot be interrupted
+        // by concurrent store/serialization attempts
+        lock (_locksByType[typeof(T)])
+        {
+            Post<T>(obj, allowAlreadyInstantiated);
+            Serialize<T>(path, obj);
+        }
+    }
 
     private static T Deserialize<T>(string path)
     {

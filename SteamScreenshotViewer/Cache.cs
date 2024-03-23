@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 
@@ -8,17 +9,25 @@ public class Cache
 {
     public const string cachePath = @"plumbing/cache.json";
 
-    public static Cache Instance => Exists() ? SerializedSingletonRegistry.Load<Cache>() : new Cache();
+    public static Cache Instance => GetInstance();
 
     public ConcurrentDictionary<string, string> NamesByAppId { get; set; } = new();
 
-    public void StoreAndSerialize()
+    public void PostAndSerialize()
     {
-        SerializedSingletonRegistry.StoreAndSerialize<Cache>(this, true);
+        SerializedSingletonRegistry.PostAndSerialize<Cache>(this, true);
     }
 
-    public static bool Exists()
+    private static Cache GetInstance()
     {
-        return Path.Exists(cachePath);
+        if (SerializedSingletonRegistry.TryGetInstance<Cache>(out Cache? instance))
+        {
+            Debug.Assert(instance is not null);
+            return instance;
+        }
+
+        Cache cache = new();
+        SerializedSingletonRegistry.Post(cache);
+        return cache;
     }
 }

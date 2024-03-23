@@ -124,21 +124,12 @@ public partial class MainWindow : Window
         Start();
     }
 
-    public static readonly DependencyProperty BasePathProperty = DependencyProperty.Register(
-        nameof(BasePath), typeof(string), typeof(MainWindow), new PropertyMetadata(default(string)));
-
-    public string BasePath
-    {
-        get { return (string)GetValue(BasePathProperty); }
-        set { SetValue(BasePathProperty, value); }
-    }
-
 
     private void HandleGameSpecificPathSubmitted(string gameSpecificScreenshotPath)
     {
         Config config = new Config();
         config.ScreenshotBasePath = ResolveBasePath(gameSpecificScreenshotPath);
-        config.StoreAndSerialize();
+        config.PostAndSerialize();
         DisplayView(View.Loading);
         Task.Run(LoadAppList);
     }

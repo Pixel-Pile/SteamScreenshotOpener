@@ -92,6 +92,7 @@ public partial class GameResolver : ObservableObject
     /// <returns></returns>
     public bool IsUnique(string name, out ResolvedSteamApp? duplicateToRemove)
     {
+        name = name.ToLower();
         // name already detected as duplicate 
         // (this is at least the 3rd app with this name) 
         if (knownDuplicateNames.Contains(name))
@@ -101,7 +102,7 @@ public partial class GameResolver : ObservableObject
         }
 
         // search for earlier resolved app with same name
-        duplicateToRemove = ResolvedApps.FirstOrDefault(app => app.Name == name);
+        duplicateToRemove = ResolvedApps.FirstOrDefault(app => app.Name.ToLower() == name);
         if (duplicateToRemove is not null)
         {
             knownDuplicateNames.Add(name);
@@ -127,7 +128,7 @@ public partial class GameResolver : ObservableObject
 
         foreach (UnresolvedSteamApp app in UnresolvedApps)
         {
-            if (app.NameCandidate == appToVerify.NameCandidate)
+            if (app.NameCandidate.ToLower() == appToVerify.NameCandidate.ToLower())
             {
                 if (app == appToVerify)
                 {

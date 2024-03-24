@@ -1,12 +1,12 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Model;
 
 namespace SteamScreenshotViewer.Views;
 
-[INotifyPropertyChanged]
-public partial class ViewUnresolvedApps : UserControl
+public partial class ViewUnresolvedApps : TopLevelView
 {
     public ViewUnresolvedApps()
     {

@@ -3,12 +3,12 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Model;
 
 namespace SteamScreenshotViewer.Views;
 
-[INotifyPropertyChanged]
-public partial class ViewLoadingScreen : UserControl
+public partial class ViewLoadingScreen : TopLevelView
 {
     public ViewLoadingScreen()
     {

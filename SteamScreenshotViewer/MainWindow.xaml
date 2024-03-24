@@ -6,8 +6,11 @@
         xmlns:local="clr-namespace:SteamScreenshotViewer"
         xmlns:markupExtensions="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
         mc:Ignorable="d"
-        Title="MainWindow" MinHeight="450" MinWidth="800"
-        SizeToContent="WidthAndHeight"
-        Style="{StaticResource MaterialDesignWindow}">
-    <ContentPresenter Content="{markupExtensions:AncestorBinding Type=local:MainWindow, Path=CurrentView}" />
+        Title="MainWindow" Height="600" MinWidth="900"
+        SizeToContent="Width"
+        Style="{StaticResource MaterialDesignWindow}"
+        FontSize="{StaticResource GlobalFontSize}">
+
+    <ContentPresenter
+        Content="{Binding RelativeSource={RelativeSource AncestorType=local:MainWindow}, Path=CurrentView}" />
 </Window>

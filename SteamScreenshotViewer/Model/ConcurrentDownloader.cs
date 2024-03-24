@@ -33,10 +33,14 @@ public class ConcurrentDownloader
         // & start a new request for every task that completes
         while (apiResponseTasks.Count != 0)
         {
+            // handle completed tasks one at a time 
+            // though not necessarily on the same thread
+            // removes need for synchronization beyond memory barriers
+            // which are provided by await
             Task<(ISteamApp, string?)> completedTask = await Task.WhenAny(apiResponseTasks);
             apiResponseTasks.Remove(completedTask);
 
-            // task is already completed; await just to propagate exceptions
+            // task is already completed; wait just to rethrow exceptions
             (ISteamApp app, string? name) = await completedTask;
 
             resolver.HandleApiResponse(app, name);

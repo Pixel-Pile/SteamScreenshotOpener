@@ -5,12 +5,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Model;
 
 namespace SteamScreenshotViewer.Views;
 
-[INotifyPropertyChanged]
-public partial class ViewApps : UserControl
+public partial class ViewApps : TopLevelView
 {
     public ViewApps()
     {

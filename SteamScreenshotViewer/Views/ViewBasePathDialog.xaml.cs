@@ -1,12 +1,13 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SteamScreenshotViewer.Controls.Code;
 
 namespace SteamScreenshotViewer.Views;
 
-[INotifyPropertyChanged]
-public partial class ViewBasePathDialog : UserControl
+public partial class ViewBasePathDialog : TopLevelView
 {
     public ViewBasePathDialog()
     {
@@ -40,13 +41,19 @@ public partial class ViewBasePathDialog : UserControl
     {
         if (string.IsNullOrEmpty(gameSpecificScreenshotPath))
         {
-            ErrorMessage = "base path cannot be empty";
+            ErrorMessage = "Path cannot be empty.";
             return;
         }
 
-        if (!System.IO.Path.Exists(gameSpecificScreenshotPath))
+        if (!Path.Exists(gameSpecificScreenshotPath))
         {
-            ErrorMessage = "path does not exist: " + gameSpecificScreenshotPath;
+            ErrorMessage = "Path does not exist.";
+            return;
+        }
+        
+        if (!gameSpecificScreenshotPath.EndsWith(Path.DirectorySeparatorChar + "screenshots"))
+        {
+            ErrorMessage = "Screenshot path should end in a directory named \"screenshots\".";
             return;
         }
 

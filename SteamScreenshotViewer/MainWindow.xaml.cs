@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Input;
+using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Model;
 using SteamScreenshotViewer.Views;
 
@@ -32,11 +33,11 @@ public partial class MainWindow : Window
     private GameResolver gameResolver = new();
 
     public static readonly DependencyProperty CurrentViewProperty = DependencyProperty.Register(
-        nameof(CurrentView), typeof(Control), typeof(MainWindow), new PropertyMetadata(default(Control)));
+        nameof(CurrentView), typeof(TopLevelView), typeof(MainWindow), new PropertyMetadata(default(TopLevelView)));
 
-    public Control CurrentView
+    public TopLevelView CurrentView
     {
-        get { return (Control)GetValue(CurrentViewProperty); }
+        get { return (TopLevelView)GetValue(CurrentViewProperty); }
         set { SetValue(CurrentViewProperty, value); }
     }
 
@@ -154,10 +155,7 @@ public partial class MainWindow : Window
 
     private string ResolveBasePath(string pathToASpecificGamesScreenshots)
     {
-        if (!pathToASpecificGamesScreenshots.EndsWith("screenshots"))
-        {
-            throw new ArgumentException($"path '{pathToASpecificGamesScreenshots}' not recognized as screenshot path");
-        }
+        
 
         char[] path = pathToASpecificGamesScreenshots.ToCharArray();
         int separatorsFound = 0;

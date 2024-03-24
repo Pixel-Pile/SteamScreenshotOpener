@@ -1,24 +1,25 @@
-﻿<UserControl x:Class="SteamScreenshotViewer.Views.ViewBasePathDialog"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
-             xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code"
-             xmlns:views="clr-namespace:SteamScreenshotViewer.Views"
-             mc:Ignorable="d"
-             FontSize="{StaticResource GlobalFontSize}">
-    <Grid Margin="16">
-        <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Margin="0,8,0,16">
-            <TextBlock FontSize="24" Margin="0,0,0,8">Screenshot Directory Path</TextBlock>
-            <TextBlock>
-                <Run Text="Enter the full path to the screenshot directory of any game." />
-                <LineBreak />
-                <Run Text="You will only have to do this once." />
-            </TextBlock>
-            <code:TextBoxWithSubmitButton
-                ErrorMessage="{Binding RelativeSource={RelativeSource AncestorType=views:ViewBasePathDialog}, Path=ErrorMessage}"
-                SubmitButtonCommand="{me:AncestorBinding Type=views:ViewBasePathDialog, Path =SubmitButtonCommandInternal}" />
-        </StackPanel>
-    </Grid>
-</UserControl>
+﻿<code:TopLevelView x:Class="SteamScreenshotViewer.Views.ViewBasePathDialog"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                   xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
+                   xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code"
+                   xmlns:views="clr-namespace:SteamScreenshotViewer.Views"
+                   mc:Ignorable="d">
+    <code:TopLevelView.Title>
+        Screenshot Directory Path
+    </code:TopLevelView.Title>
+    <code:TopLevelView.Description>
+        <TextBlock>
+            <Run Text="Enter the full path to the screenshot directory of any game." />
+            <LineBreak />
+            <Run Text="You will only have to do this once." />
+        </TextBlock>
+    </code:TopLevelView.Description>
+
+    <code:TextBoxWithSubmitButton
+        VerticalAlignment="Center"
+        ErrorMessage="{Binding RelativeSource={RelativeSource AncestorType=views:ViewBasePathDialog}, Path=ErrorMessage}"
+        SubmitButtonCommand="{me:AncestorBinding Type=views:ViewBasePathDialog, Path =SubmitButtonCommandInternal}" />
+</code:TopLevelView>

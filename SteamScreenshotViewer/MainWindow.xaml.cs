@@ -2,8 +2,10 @@
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
 using SteamScreenshotViewer.Controls.Code;
+using SteamScreenshotViewer.Helper;
 using SteamScreenshotViewer.Model;
 using SteamScreenshotViewer.Views;
+using GameResolver = SteamScreenshotViewer.Helper.GameResolver;
 
 namespace SteamScreenshotViewer;
 

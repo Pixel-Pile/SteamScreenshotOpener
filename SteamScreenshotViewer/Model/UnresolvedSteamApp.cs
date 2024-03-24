@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using System.Net.Http;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SteamScreenshotViewer.Helper;
 
 namespace SteamScreenshotViewer.Model;
 
@@ -72,7 +72,7 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     [RelayCommand]
     private Task OpenScreenshotFolder()
     {
-        Process.Start("explorer.exe", this.ScreenshotsPath);
+        Process.Start("explorer.exe", ScreenshotsPath);
         return Task.CompletedTask;
     }
 
@@ -82,7 +82,7 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     {
         Process.Start(new ProcessStartInfo
         {
-            FileName = $"https://steamdb.info/app/{this.Id}/",
+            FileName = $"https://steamdb.info/app/{Id}/",
             UseShellExecute = true
         });
         return Task.CompletedTask;
@@ -91,7 +91,7 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     [RelayCommand(CanExecute = nameof(RetrySteamApiCommandEnabled))]
     private async Task RetrySteamApi()
     {
-        ApiResponse response = await SteamApiClient.GetAppNameAsync(this.Id);
+        ApiResponse response = await SteamApiClient.GetAppNameAsync(Id);
         if (response.ContainsName)
         {
             NameCandidate = response.Name!;

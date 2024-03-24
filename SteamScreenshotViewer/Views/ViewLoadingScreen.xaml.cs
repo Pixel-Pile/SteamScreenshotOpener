@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Model;
+using GameResolver = SteamScreenshotViewer.Helper.GameResolver;
 
 namespace SteamScreenshotViewer.Views;
 

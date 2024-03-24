@@ -1,7 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using SteamScreenshotViewer.Model;
 
-namespace SteamScreenshotViewer.Model;
+namespace SteamScreenshotViewer.Helper;
 
 public class ConcurrentDownloader
 {

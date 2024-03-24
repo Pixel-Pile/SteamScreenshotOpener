@@ -3,8 +3,9 @@ using System.Net.Http;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Serilog;
+using SteamScreenshotViewer.Model;
 
-namespace SteamScreenshotViewer.Model;
+namespace SteamScreenshotViewer.Helper;
 
 public static partial class SteamApiClient
 {

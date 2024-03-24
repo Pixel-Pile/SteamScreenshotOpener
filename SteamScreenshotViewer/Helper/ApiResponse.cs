@@ -1,4 +1,6 @@
-﻿namespace SteamScreenshotViewer.Model;
+﻿using SteamScreenshotViewer.Model;
+
+namespace SteamScreenshotViewer.Helper;
 
 public class ApiResponse
 {

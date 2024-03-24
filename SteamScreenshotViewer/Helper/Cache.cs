@@ -1,11 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.IO;
-using System.Text.Json;
 using Serilog;
-using SteamScreenshotViewer.Model;
 
-namespace SteamScreenshotViewer;
+namespace SteamScreenshotViewer.Helper;
 
 public class Cache
 {

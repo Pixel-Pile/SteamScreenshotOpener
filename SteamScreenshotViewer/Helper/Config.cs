@@ -1,8 +1,7 @@
 ﻿using System.IO;
-using System.Text.Json;
 using Serilog;
 
-namespace SteamScreenshotViewer;
+namespace SteamScreenshotViewer.Helper;
 
 public class Config
 {

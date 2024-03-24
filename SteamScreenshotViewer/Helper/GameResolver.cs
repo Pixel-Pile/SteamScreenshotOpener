@@ -2,11 +2,11 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
+using SteamScreenshotViewer.Model;
 
-namespace SteamScreenshotViewer.Model;
+namespace SteamScreenshotViewer.Helper;
 
 public partial class GameResolver : ObservableObject
 {

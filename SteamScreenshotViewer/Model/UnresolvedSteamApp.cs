@@ -31,6 +31,7 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     {
         _resolver = resolver;
         FailureCause = failureCause;
+        inConstructor = false;
     }
 
     public UnresolvedSteamApp(ResolvedSteamApp app, FailureCause failureCause, GameResolver resolver) : base(app)
@@ -38,12 +39,24 @@ public partial class UnresolvedSteamApp : SteamAppExtension
         _resolver = resolver;
         NameCandidate = app.Name;
         FailureCause = failureCause;
+        inConstructor = false;
     }
 
     [ObservableProperty] private FailureCause failureCause;
     [ObservableProperty] private String nameCandidate = string.Empty;
     [ObservableProperty] private bool? nameCandidateValid;
     [ObservableProperty] private bool retrySteamApiCommandEnabled;
+    private readonly bool inConstructor;
+
+    partial void OnNameCandidateChanged(string? oldValue, string newValue)
+    {
+        if (oldValue == newValue)
+        {
+            return;
+        }
+
+        _resolver.ValidateNameCandidate(this);
+    }
 
 
     partial void OnFailureCauseChanged(FailureCause value)
@@ -83,22 +96,12 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     [RelayCommand(CanExecute = nameof(RetrySteamApiCommandEnabled))]
     private async Task RetrySteamApi()
     {
-        try
+        ApiResponse response = await SteamApiClient.GetAppNameAsync(this.Id);
+        if (response.ContainsName)
         {
-            string? name = await SteamApiClient.GetAppNameAsync(this.Id);
-            if (name is not null)
-            {
-                NameCandidate = name;
-                _resolver.ValidateNameCandidate(this);
-            }
+            NameCandidate = response.Name!;
         }
-        catch (HttpRequestException)
-        {
-        }
-        finally
-        {
-            // fix is only allowed once
-            RetrySteamApiCommandEnabled = false;
-        }
+
+        RetrySteamApiCommandEnabled = false;
     }
 }

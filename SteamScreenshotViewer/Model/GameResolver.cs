@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Windows;
@@ -16,6 +17,7 @@ public partial class GameResolver : ObservableObject
 
     [ObservableProperty] private int totalAppCount;
     [ObservableProperty] private double autoResolvingProgress;
+
     public event Action? AutoResolveFinished;
     public event Action? AppsFullyResolved;
 
@@ -168,27 +170,18 @@ public partial class GameResolver : ObservableObject
     }
 
 
-    public void HandleApiResponse(ISteamApp app, string? name)
+    public void HandleApiResponse(ISteamApp app, ApiResponse response)
     {
-        try
+        if (!response.ContainsName)
         {
-            if (name is null)
-            {
-                HandleUnresolvedApp(new UnresolvedSteamApp(app, FailureCause.SteamApi, this));
-                return;
-            }
+            Debug.Assert(response.FailureCause != null);
+            HandleUnresolvedApp(new UnresolvedSteamApp(app, response.FailureCause!.Value, this));
+            return;
+        }
 
-            // name found
-            HandleNewlyResolvedApp(new ResolvedSteamApp(app, name));
-        }
-        catch (HttpRequestException e)
-        {
-            Console.WriteLine($"request for {app.Id} failed with code {e.StatusCode}");
-            Console.WriteLine(e.StackTrace);
-            HandleUnresolvedApp(new UnresolvedSteamApp(app, FailureCause.Network, this));
-        }
+        // name found
+        HandleNewlyResolvedApp(new ResolvedSteamApp(app, response.Name!));
     }
-
 
     private string GetAppIdFromScreenshotDirectoryPath(string directory)
     {
@@ -250,7 +243,6 @@ public partial class GameResolver : ObservableObject
 
     public bool AttemptManualResolve(UnresolvedSteamApp unresolvedApp, string unresolvedAppName)
     {
-        ValidateNameCandidate(unresolvedApp);
         switch (unresolvedApp.NameCandidateValid)
         {
             case true:

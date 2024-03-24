@@ -42,11 +42,4 @@ public partial class ViewUnresolvedApps : TopLevelView
         }
     }
 
-    private void OnNameEdited(object sender, RoutedEventArgs e)
-    {
-        if (sender is TextBox { DataContext: UnresolvedSteamApp unresolvedApp })
-        {
-            GameResolver.ValidateNameCandidate(unresolvedApp);
-        }
-    }
 }

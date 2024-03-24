@@ -61,7 +61,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="{x:Type model:UnresolvedSteamApp}">
                                 <TextBox Text="{Binding NameCandidate, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                         LostFocus="OnNameEdited" MinWidth="250">
+                                         MinWidth="250">
                                     <!-- VerticalAlignment="Center" HorizontalAlignment="Center"> -->
                                     <TextBox.Style>
                                         <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">

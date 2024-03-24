@@ -21,7 +21,8 @@ public class ConcurrentDownloader
 
     public async Task ResolveAppNames()
     {
-        List<Task<(ISteamApp, string?)>> apiResponseTasks = new List<Task<(ISteamApp, string?)>>(ConcurrentDownloads);
+        List<Task<(ISteamApp, ApiResponse)>> apiResponseTasks =
+            new List<Task<(ISteamApp, ApiResponse)>>(ConcurrentDownloads);
 
         // start x concurrent requests
         for (int concurrentTasks = 0; concurrentTasks < ConcurrentDownloads; concurrentTasks++)
@@ -37,19 +38,19 @@ public class ConcurrentDownloader
             // though not necessarily on the same thread
             // removes need for synchronization beyond memory barriers
             // which are provided by await
-            Task<(ISteamApp, string?)> completedTask = await Task.WhenAny(apiResponseTasks);
+            Task<(ISteamApp, ApiResponse)> completedTask = await Task.WhenAny(apiResponseTasks);
             apiResponseTasks.Remove(completedTask);
 
             // task is already completed; wait just to rethrow exceptions
-            (ISteamApp app, string? name) = await completedTask;
+            (ISteamApp app, ApiResponse response) = await completedTask;
 
-            resolver.HandleApiResponse(app, name);
+            resolver.HandleApiResponse(app, response);
 
             ResolveAppsUntilOneRequestIsMade(apiResponseTasks);
         }
     }
 
-    private void ResolveAppsUntilOneRequestIsMade(List<Task<(ISteamApp, string?)>> apiResponseTasks)
+    private void ResolveAppsUntilOneRequestIsMade(List<Task<(ISteamApp, ApiResponse)>> apiResponseTasks)
     {
         // return if all apps are handled
         while (handledAppsTotal < apps.Count)
@@ -77,8 +78,7 @@ public class ConcurrentDownloader
         return resolvedByCache;
     }
 
-    private void ResolveByRequest(ISteamApp app,
-        List<Task<(ISteamApp, string?)>> apiResponseTasks)
+    private void ResolveByRequest(ISteamApp app, List<Task<(ISteamApp, ApiResponse)>> apiResponseTasks)
     {
         apiResponseTasks.Add(SteamApiClient.GetAppNameAsync(app));
         Debug.Assert(apiResponseTasks.Count() <= ConcurrentDownloads);

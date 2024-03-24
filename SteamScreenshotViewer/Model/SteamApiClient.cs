@@ -81,24 +81,24 @@ public static partial class SteamApiClient
         return $"{BaseRequestFilterBasic}&appids={appId}";
     }
 
-    public static async Task<(ISteamApp, string?)> GetAppNameAsync(ISteamApp app)
+    public static async Task<(ISteamApp, ApiResponse)> GetAppNameAsync(ISteamApp app)
     {
-        string? name = await GetAppNameAsync(app.Id);
+        ApiResponse response = await GetAppNameAsync(app.Id);
 
-        return (app, name);
+        return (app, response);
     }
 
-    public static async Task<string?> GetAppNameAsync(string appId)
+    public static async Task<ApiResponse> GetAppNameAsync(string appId)
     {
-        (string? name, bool retryWithDifferentFilter) = await TryGetAppNameFromPackages(appId);
+        ApiResponse response = await TryGetAppNameFromPackages(appId);
 
-        if (name is null && retryWithDifferentFilter)
+        if (response.ShouldRetry)
         {
             Console.WriteLine("attempting to resolve using filters=basic: " + appId);
-            name = await TryGetAppNameFromBasic(appId);
+            response = await TryGetAppNameFromBasic(appId);
         }
 
-        return name;
+        return response;
     }
 
 
@@ -117,7 +117,7 @@ public static partial class SteamApiClient
         return false;
     }
 
-    public static async Task<(string? name, bool retryWithDifferentFilter)> TryGetAppNameFromPackages(string appId)
+    private static async Task<ApiResponse> TryGetAppNameFromPackages(string appId)
     {
         try
         {
@@ -126,7 +126,7 @@ public static partial class SteamApiClient
             {
                 // Success=false -> steamapi does not know that app id anymore
                 // --> retrying with different filters makes no sense
-                return (null, false);
+                return ApiResponse.Failure(FailureCause.SteamApi);
             }
 
             JsonArray packages = ((JsonArray?)dataNode["package_groups"])
@@ -137,7 +137,7 @@ public static partial class SteamApiClient
                 // no package options -> app free or no longer sold on steam
                 // success was true meaning api does still have data on that id
                 // -> retry with different filter
-                return (null, true);
+                return ApiResponse.Retry();
             }
 
             string buyGamePackageName = packages[0]?["title"]?.ToString()
@@ -147,50 +147,52 @@ public static partial class SteamApiClient
             if (!match.Success)
             {
                 // retry with different filter
-                return (null, true);
+                return ApiResponse.Retry();
             }
 
-            return (match.Groups[1].Value, false);
+            return ApiResponse.Success(match.Groups[1].Value);
         }
         catch (NullReferenceException e)
         {
             //TODO logging 
             // most likely failed to parse response json
             // -> retry with different filter
-            return (null, true);
+            return ApiResponse.Retry();
         }
         catch (HttpRequestException e)
         {
             //TODO logging
             // network issues
-            return (null, false);
+            return ApiResponse.Failure(FailureCause.Network);
         }
     }
 
-    private static async Task<string?> TryGetAppNameFromBasic(string appId)
+    private static async Task<ApiResponse> TryGetAppNameFromBasic(string appId)
     {
         try
         {
             string response = await GetResponseString(BuildRequestFilterBasic(appId));
             if (!TryGetDataNodeIfSuccess(response, appId, out JsonNode? dataNode))
             {
-                return null;
+                // response contains success = "false"
+                return ApiResponse.Failure(FailureCause.SteamApi);
             }
 
-            return dataNode["name"]?.ToString()
-                   ?? throw new NullReferenceException("json response did not contain name");
+            string name = dataNode["name"]?.ToString()
+                          ?? throw new NullReferenceException("json response did not contain name");
+            return ApiResponse.Success(name);
         }
         catch (NullReferenceException e)
         {
             //TODO logging 
             // most likely failed to parse response json
-            return null;
+            return ApiResponse.Failure(FailureCause.SteamApi);
         }
         catch (HttpRequestException e)
         {
             //TODO logging
             // network issues
-            return null;
+            return ApiResponse.Failure(FailureCause.Network);
         }
     }
 

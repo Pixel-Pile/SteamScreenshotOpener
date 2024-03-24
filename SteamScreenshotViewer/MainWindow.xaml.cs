@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
+using Serilog.Core;
 using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Helper;
 using SteamScreenshotViewer.Model;
@@ -28,10 +29,28 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         ConfigureLogger();
-        TaskScheduler.UnobservedTaskException += Rethrow;
+        AppDomain.CurrentDomain.UnhandledException += LogExceptionAndShutdown;
+        TaskScheduler.UnobservedTaskException += LogExceptionAndShutdown;
         gameResolver.AutoResolveFinished += HandleAutoResolveFinished;
         gameResolver.AppsFullyResolved += HandleAppsFullyResolved;
         InitializeComponent();
+    }
+
+    private static void LogExceptionAndShutdown(Exception e)
+    {
+        log.Fatal(e, "unhandled exception");
+        Log.CloseAndFlush();
+        Application.Current.Shutdown();
+    }
+
+    private static void LogExceptionAndShutdown(object sender, UnhandledExceptionEventArgs e)
+    {
+        LogExceptionAndShutdown((Exception)e.ExceptionObject);
+    }
+
+    private static void LogExceptionAndShutdown(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        LogExceptionAndShutdown(e.Exception);
     }
 
     public static void ConfigureLogger()
@@ -124,13 +143,6 @@ public partial class MainWindow : Window
     {
         ViewApps view = new(gameResolver);
         CurrentView = view;
-    }
-
-
-    private void Rethrow(object? sender, UnobservedTaskExceptionEventArgs e)
-    {
-        log.Fatal("unobserved exception");
-        throw e.Exception;
     }
 
     protected override void OnInitialized(EventArgs e)

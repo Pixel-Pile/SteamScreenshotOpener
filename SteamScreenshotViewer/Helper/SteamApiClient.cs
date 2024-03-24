@@ -160,13 +160,13 @@ public static partial class SteamApiClient
         {
             // most likely failed to parse response json
             // -> retry with different filter
-            log.Warning(e, "failed to resolve app");
+            log.Warning(e, $"failed to resolve app '{appId}'");
             return ApiResponse.Retry();
         }
         catch (HttpRequestException e)
         {
             // network issues
-            log.Warning(e, "failed to resolve app");
+            log.Warning(e, $"failed to resolve app '{appId}'");
             return ApiResponse.Failure(FailureCause.Network);
         }
     }
@@ -189,13 +189,13 @@ public static partial class SteamApiClient
         catch (NullReferenceException e)
         {
             // most likely failed to parse response json
-            log.Warning(e, "failed to resolve app");
+            log.Warning(e, $"failed to resolve app '{appId}'");
             return ApiResponse.Failure(FailureCause.SteamApi);
         }
         catch (HttpRequestException e)
         {
             // network issues
-            log.Warning(e, "failed to resolve app");
+            log.Warning(e, $"failed to resolve app '{appId}'");
             return ApiResponse.Failure(FailureCause.Network);
         }
     }

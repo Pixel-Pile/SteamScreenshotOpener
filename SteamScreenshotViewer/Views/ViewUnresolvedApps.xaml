@@ -32,8 +32,17 @@
         <StackPanel DockPanel.Dock="Bottom" Orientation="Vertical">
             <Button Content="Commit all resolved names" Click="CommitAll" />
         </StackPanel>
-        <ListView FontSize="{StaticResource GlobalFontSize}"
-                  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Path=GameResolver.ObservedUnresolvedApps}">
+        <ListView
+            FontSize="{StaticResource GlobalFontSize}"
+            ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Path=GameResolver.ObservedUnresolvedApps}">
+            <ListView.Resources>
+                <!-- setting on listview/gridview directly is ignored see https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit/issues/1220 -->
+                <Style x:Key="{x:Static GridView.GridViewScrollViewerStyleKey}"
+                       BasedOn="{StaticResource {x:Static GridView.GridViewScrollViewerStyleKey}}"
+                       TargetType="ScrollViewer">
+                    <Setter Property="CanContentScroll" Value="False" />
+                </Style>
+            </ListView.Resources>
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignGridViewItem}">
                     <!-- <Setter Property="Padding" Value="4"/> -->

@@ -92,7 +92,13 @@ public partial class GameResolver : ObservableObject
     /// <returns></returns>
     public bool IsUnique(string name, out ResolvedSteamApp? duplicateToRemove)
     {
-        name = name.ToLower();
+        if (string.IsNullOrEmpty(name) || name.Trim().Length == 0)
+        {
+            duplicateToRemove = null;
+            return false;
+        }
+
+        name = name.ToLower().Trim();
         // name already detected as duplicate 
         // (this is at least the 3rd app with this name) 
         if (knownDuplicateNames.Contains(name))
@@ -114,12 +120,6 @@ public partial class GameResolver : ObservableObject
 
     public void ValidateNameCandidate(UnresolvedSteamApp appToVerify)
     {
-        if (string.IsNullOrEmpty(appToVerify.NameCandidate))
-        {
-            appToVerify.NameCandidateValid = false;
-            return;
-        }
-
         if (!IsUnique(appToVerify.NameCandidate, out ResolvedSteamApp? _))
         {
             appToVerify.NameCandidateValid = false;
@@ -128,7 +128,7 @@ public partial class GameResolver : ObservableObject
 
         foreach (UnresolvedSteamApp app in UnresolvedApps)
         {
-            if (app.NameCandidate.ToLower() == appToVerify.NameCandidate.ToLower())
+            if (app.NameCandidate.ToLower().Trim() == appToVerify.NameCandidate.ToLower().Trim())
             {
                 if (app == appToVerify)
                 {
@@ -266,5 +266,16 @@ public partial class GameResolver : ObservableObject
                 throw new InvalidOperationException(
                     $"{nameof(UnresolvedSteamApp.NameCandidateValid)} was null after call to {nameof(ValidateNameCandidate)}");
         }
+    }
+
+    public void ResolveAppIfNameCandidateValid(UnresolvedSteamApp unresolvedApp)
+    {
+        // null or false
+        if (unresolvedApp.NameCandidateValid != true)
+        {
+            return;
+        }
+
+        AttemptManualResolve(unresolvedApp, unresolvedApp.NameCandidate);
     }
 }

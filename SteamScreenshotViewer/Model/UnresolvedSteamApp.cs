@@ -50,11 +50,6 @@ public partial class UnresolvedSteamApp : SteamAppExtension
 
     partial void OnNameCandidateChanged(string? oldValue, string newValue)
     {
-        if (oldValue == newValue)
-        {
-            return;
-        }
-
         _resolver.ValidateNameCandidate(this);
     }
 

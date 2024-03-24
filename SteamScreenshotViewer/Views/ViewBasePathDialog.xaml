@@ -19,7 +19,12 @@
     </code:TopLevelView.Description>
 
     <code:TextBoxWithSubmitButton
-        VerticalAlignment="Center"
+        x:Name="TextBoxWithSubmitButton"
+        VerticalAlignment="Top"
         ErrorMessage="{Binding RelativeSource={RelativeSource AncestorType=views:ViewBasePathDialog}, Path=ErrorMessage}"
-        SubmitButtonCommand="{me:AncestorBinding Type=views:ViewBasePathDialog, Path =SubmitButtonCommandInternal}" />
+        SubmitButtonCommand="{me:AncestorBinding Type=views:ViewBasePathDialog, Path =SubmitButtonCommandInternal}">
+        <code:TextBoxWithSubmitButton.TextBox>
+            <TextBox HorizontalAlignment="Stretch" MinWidth="10" KeyDown="OnKeyDownHandler" />
+        </code:TextBoxWithSubmitButton.TextBox>
+    </code:TextBoxWithSubmitButton>
 </code:TopLevelView>

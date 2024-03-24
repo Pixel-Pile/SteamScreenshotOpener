@@ -98,7 +98,7 @@ public partial class MainWindow : Window
 
     private void LoadBasePathDialogView()
     {
-        ViewBasePathDialog basePathDialog = new();
+        ViewBasePathDialog basePathDialog = new(gameResolver);
         basePathDialog.SubmitButtonCommand = new RelayCommand<string>(HandleGameSpecificPathSubmitted);
         CurrentView = basePathDialog;
     }

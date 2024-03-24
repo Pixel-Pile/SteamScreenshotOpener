@@ -20,7 +20,7 @@ public class TextBoxWithSubmitButton : Control
     }
 
 
-    private void ExecuteCommandWithTextBoxText()
+    public void ExecuteCommandWithTextBoxText()
     {
         SubmitButtonCommand.Execute(TextBox.Text);
     }

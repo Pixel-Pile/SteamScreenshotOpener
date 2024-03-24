@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Model;
@@ -25,12 +26,7 @@ public partial class ViewUnresolvedApps : TopLevelView
     {
         if (sender is Button { DataContext: UnresolvedSteamApp unresolvedApp })
         {
-            if (unresolvedApp.NameCandidateValid is false)
-            {
-                return;
-            }
-
-            GameResolver.AttemptManualResolve(unresolvedApp, unresolvedApp.NameCandidate);
+            GameResolver.ResolveAppIfNameCandidateValid(unresolvedApp);
         }
     }
 
@@ -43,4 +39,22 @@ public partial class ViewUnresolvedApps : TopLevelView
         }
     }
 
+
+    private void OnKeyDownHandler(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Return)
+        {
+            return;
+        }
+
+        if (sender is FrameworkElement { DataContext: UnresolvedSteamApp unresolvedApp } elem)
+
+        {
+            // focus next item before resolving = potentially removing current
+            TraversalRequest request = new TraversalRequest(FocusNavigationDirection.Down);
+            request.Wrapped = true;
+            elem.MoveFocus(request);
+            GameResolver.ResolveAppIfNameCandidateValid(unresolvedApp);
+        }
+    }
 }

@@ -1,19 +1,25 @@
 ﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SteamScreenshotViewer.Controls.Code;
+using SteamScreenshotViewer.Model;
 
 namespace SteamScreenshotViewer.Views;
 
 public partial class ViewBasePathDialog : TopLevelView
 {
-    public ViewBasePathDialog()
+    public ViewBasePathDialog(GameResolver resolver)
     {
         SubmitButtonCommandInternal = new RelayCommand<string>(HandleSubmitCommand);
+        GameResolver = resolver;
         InitializeComponent();
     }
+
+    [ObservableProperty] private GameResolver gameResolver;
+
 
     public static readonly DependencyProperty SubmitButtonCommandInternalProperty = DependencyProperty.Register(
         nameof(SubmitButtonCommandInternal), typeof(RelayCommand<string>), typeof(ViewBasePathDialog),
@@ -50,7 +56,7 @@ public partial class ViewBasePathDialog : TopLevelView
             ErrorMessage = "Path does not exist.";
             return;
         }
-        
+
         if (!gameSpecificScreenshotPath.EndsWith(Path.DirectorySeparatorChar + "screenshots"))
         {
             ErrorMessage = "Screenshot path should end in a directory named \"screenshots\".";
@@ -58,5 +64,16 @@ public partial class ViewBasePathDialog : TopLevelView
         }
 
         SubmitButtonCommand.Execute(gameSpecificScreenshotPath);
+    }
+
+    private void OnKeyDownHandler(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Return)
+        {
+            return;
+        }
+
+
+        TextBoxWithSubmitButton.ExecuteCommandWithTextBoxText();
     }
 }

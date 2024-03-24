@@ -25,7 +25,7 @@
             <Run
                 Text="{me:AncestorBinding Type=local:ViewLoadingScreen, Mode=OneWay,Path=GameResolver.TotalAppCount}" />
         </TextBlock>
-        <ProgressBar Height="12" Margin="32,4" MinWidth="240"
+        <ProgressBar Height="16" Margin="32,8" MinWidth="240"
                      Value="{me:AncestorBinding Type=local:ViewLoadingScreen, Path=GameResolver.AutoResolvingProgress}" />
         <TextBlock HorizontalAlignment="Center">
             <Run Text="Failed Name Lookups: " />

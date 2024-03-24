@@ -29,6 +29,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         ConfigureLogger();
+        log.Information("program started");
         AppDomain.CurrentDomain.UnhandledException += LogExceptionAndShutdown;
         TaskScheduler.UnobservedTaskException += LogExceptionAndShutdown;
         gameResolver.AutoResolveFinished += HandleAutoResolveFinished;

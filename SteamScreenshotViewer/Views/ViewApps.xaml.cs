@@ -23,6 +23,8 @@ public partial class ViewApps : TopLevelView
     {
         base.OnInitialized(e);
         collectionView = CollectionViewSource.GetDefaultView(GameResolver.ObservedResolvedApps);
+        collectionView.SortDescriptions.Add(new SortDescription(nameof(ResolvedSteamApp.Name),
+            ListSortDirection.Ascending));
     }
 
     [ObservableProperty] private GameResolver gameResolver;

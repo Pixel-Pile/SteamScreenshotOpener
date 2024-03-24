@@ -10,8 +10,9 @@ namespace SteamScreenshotViewer.Views;
 
 public partial class ViewLoadingScreen : TopLevelView
 {
-    public ViewLoadingScreen()
+    public ViewLoadingScreen(GameResolver resolver)
     {
+        GameResolver = resolver;
         InitializeComponent();
     }
 

@@ -8,8 +8,9 @@ namespace SteamScreenshotViewer.Views;
 
 public partial class ViewUnresolvedApps : TopLevelView
 {
-    public ViewUnresolvedApps()
+    public ViewUnresolvedApps(GameResolver resolver)
     {
+        GameResolver = resolver;
         InitializeComponent();
     }
 

@@ -86,15 +86,13 @@ public partial class MainWindow : Window
 
     private void LoadLoadingScreenView()
     {
-        ViewLoadingScreen view = new();
-        view.GameResolver = gameResolver;
+        ViewLoadingScreen view = new(gameResolver);
         CurrentView = view;
     }
 
     private void LoadUnresolvedAppsView()
     {
-        ViewUnresolvedApps view = new();
-        view.GameResolver = gameResolver;
+        ViewUnresolvedApps view = new(gameResolver);
         CurrentView = view;
     }
 
@@ -107,8 +105,7 @@ public partial class MainWindow : Window
 
     private void LoadAppsView()
     {
-        ViewApps view = new();
-        view.GameResolver = gameResolver;
+        ViewApps view = new(gameResolver);
         CurrentView = view;
     }
 

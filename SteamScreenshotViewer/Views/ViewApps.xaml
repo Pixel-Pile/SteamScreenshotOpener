@@ -15,12 +15,25 @@
         <TextBlock Text="Open screenshot Folder by double clicking" />
     </code:TopLevelView.Description>
 
-    <ListView MouseDoubleClick="OnAppClick"
-              ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=GameResolver.ObservedResolvedApps}">
-        <ListView.ItemTemplate>
-            <DataTemplate DataType="{x:Type model:ResolvedSteamApp}">
-                <TextBlock Text="{Binding Path=Name}" />
-            </DataTemplate>
-        </ListView.ItemTemplate>
-    </ListView>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBox Margin="0,0,0,8"
+            Text="{Binding Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=SearchString}" />
+        <ListView Grid.Row="1" MouseDoubleClick="OnAppClick" x:Name="ListViewApps"
+                  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=GameResolver.ObservedResolvedApps}">
+            <ListView.ItemTemplate>
+                <DataTemplate DataType="{x:Type model:ResolvedSteamApp}">
+                    <TextBlock Text="{Binding Path=Name}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn DisplayMemberBinding="{Binding Name}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
 </code:TopLevelView>

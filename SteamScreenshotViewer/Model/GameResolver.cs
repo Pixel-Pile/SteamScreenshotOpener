@@ -102,7 +102,7 @@ public partial class GameResolver : ObservableObject
         }
 
         // search for earlier resolved app with same name
-        duplicateToRemove = ResolvedApps.FirstOrDefault(app => app.Name.ToLower() == name);
+        duplicateToRemove = ResolvedApps.FirstOrDefault(app => app.LowerCaseName == name);
         if (duplicateToRemove is not null)
         {
             knownDuplicateNames.Add(name);

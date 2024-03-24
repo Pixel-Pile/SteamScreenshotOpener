@@ -1,11 +1,14 @@
 ﻿using System.IO;
 using System.Text.Json;
+using Serilog;
 
 namespace SteamScreenshotViewer;
 
 public class Config
 {
-    public const string configPath = "plumbing/Config.json";
+    private static ILogger log = Log.ForContext<Config>();
+
+    public const string configPath = "storage/Config.json";
 
     public static Config Instance => GetInstance();
 

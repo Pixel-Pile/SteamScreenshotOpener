@@ -2,11 +2,14 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
+using Serilog;
 
 namespace SteamScreenshotViewer;
 
 public class SerializedSingletonRegistry
 {
+    private static ILogger log = Log.ForContext(typeof(SerializedSingletonRegistry));
+
     private static readonly Dictionary<Type, string> _pathsByType = new(2);
     private static Dictionary<Type, object> _locksByType = new();
 
@@ -78,6 +81,7 @@ public class SerializedSingletonRegistry
 
     public static void Post<T>(T obj, bool allowAlreadyInstantiated = false)
     {
+        log.Information($"posting new instance for type {typeof(T).Name}");
         _ = obj ?? throw new NullReferenceException("null is not a valid singleton instance");
 
         lock (_locksByType[typeof(T)]) // prevent concurrent serialization of same type
@@ -114,6 +118,8 @@ public class SerializedSingletonRegistry
 
     private static T Deserialize<T>(string path)
     {
+        log.Information($"deserializing instance of type {typeof(T).Name}");
+
         if (!Path.Exists(path))
         {
             throw new InvalidOperationException("json file does not exists!");
@@ -126,6 +132,8 @@ public class SerializedSingletonRegistry
 
     private static void Serialize<T>(string path, T obj)
     {
+        log.Information($"serializing instance of type {typeof(T).Name}");
+
         // create dir if missing
         string directoryPath = path.Substring(0, path.LastIndexOf("/"));
         Directory.CreateDirectory(directoryPath);

@@ -17,10 +17,7 @@ public partial class ViewUnresolvedApps : TopLevelView
 
     [ObservableProperty] private GameResolver gameResolver;
 
-    private void DataGrid_OnRowEditEnding(object? sender, DataGridRowEditEndingEventArgs e)
-    {
-        Console.WriteLine(e.GetType());
-    }
+   
 
     private void Commit(object sender, RoutedEventArgs e)
     {

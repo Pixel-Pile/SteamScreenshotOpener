@@ -62,7 +62,7 @@ public partial class GameResolver : ObservableObject
             // cached
             ResolvedSteamApp resolvedApp = new ResolvedSteamApp(app, name);
             AddResolvedAppCandidate(resolvedApp, false);
-            Console.WriteLine($"already cached: {resolvedApp}");
+            // Console.WriteLine($"already cached: {resolvedApp}");
             return true;
         }
 
@@ -72,14 +72,14 @@ public partial class GameResolver : ObservableObject
     private void HandleUnresolvedApp(UnresolvedSteamApp unresolvedApp)
     {
         AddUnresolved(unresolvedApp);
-        Console.WriteLine("could not resolve name for id: " + unresolvedApp.Id);
+        // Console.WriteLine("could not resolve name for id: " + unresolvedApp.Id);
     }
 
 
     private void HandleNewlyResolvedApp(ResolvedSteamApp resolvedApp)
     {
         AddResolvedAppCandidate(resolvedApp, true);
-        Console.WriteLine($"resolved name: {resolvedApp.Id} -> {resolvedApp.Name}");
+        // Console.WriteLine($"resolved name: {resolvedApp.Id} -> {resolvedApp.Name}");
     }
 
 

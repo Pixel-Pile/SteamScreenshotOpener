@@ -1,6 +1,6 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Model;
 using SteamScreenshotViewer.Views;
@@ -21,13 +21,28 @@ public enum View
 /// </summary>
 public partial class MainWindow : Window
 {
+    private static ILogger log = Log.ForContext<MainWindow>();
+
     public MainWindow()
     {
+        ConfigureLogger();
         TaskScheduler.UnobservedTaskException += Rethrow;
         gameResolver.AutoResolveFinished += HandleAutoResolveFinished;
         gameResolver.AppsFullyResolved += HandleAppsFullyResolved;
         InitializeComponent();
     }
+
+    public static void ConfigureLogger()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.File($"logs/{FormatDateTimeForFileName(DateTime.Now)}.log")
+            .CreateLogger();
+    }
+
+    public static string FormatDateTimeForFileName(DateTime time) => $"{time:yyyy-MM-dd_HH-mm-ss}";
 
 
     private GameResolver gameResolver = new();
@@ -112,7 +127,7 @@ public partial class MainWindow : Window
 
     private void Rethrow(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        Console.WriteLine("unobserved exception");
+        log.Fatal("unobserved exception");
         throw e.Exception;
     }
 
@@ -152,8 +167,6 @@ public partial class MainWindow : Window
 
     private string ResolveBasePath(string pathToASpecificGamesScreenshots)
     {
-        
-
         char[] path = pathToASpecificGamesScreenshots.ToCharArray();
         int separatorsFound = 0;
         int i = path.Length - 1;

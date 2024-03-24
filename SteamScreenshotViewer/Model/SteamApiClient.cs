@@ -2,11 +2,14 @@
 using System.Net.Http;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using Serilog;
 
 namespace SteamScreenshotViewer.Model;
 
 public static partial class SteamApiClient
 {
+    private static ILogger log = Log.ForContext(typeof(SteamApiClient));
+
     private static HttpClient httpClient = new();
 
     /* request for name only are not possible
@@ -94,7 +97,7 @@ public static partial class SteamApiClient
 
         if (response.ShouldRetry)
         {
-            Console.WriteLine("attempting to resolve using filters=basic: " + appId);
+            // log.Information("attempting to resolve using filters=basic: " + appId);
             response = await TryGetAppNameFromBasic(appId);
         }
 
@@ -154,15 +157,15 @@ public static partial class SteamApiClient
         }
         catch (NullReferenceException e)
         {
-            //TODO logging 
             // most likely failed to parse response json
             // -> retry with different filter
+            log.Warning(e, "failed to resolve app");
             return ApiResponse.Retry();
         }
         catch (HttpRequestException e)
         {
-            //TODO logging
             // network issues
+            log.Warning(e, "failed to resolve app");
             return ApiResponse.Failure(FailureCause.Network);
         }
     }
@@ -184,14 +187,14 @@ public static partial class SteamApiClient
         }
         catch (NullReferenceException e)
         {
-            //TODO logging 
             // most likely failed to parse response json
+            log.Warning(e, "failed to resolve app");
             return ApiResponse.Failure(FailureCause.SteamApi);
         }
         catch (HttpRequestException e)
         {
-            //TODO logging
             // network issues
+            log.Warning(e, "failed to resolve app");
             return ApiResponse.Failure(FailureCause.Network);
         }
     }

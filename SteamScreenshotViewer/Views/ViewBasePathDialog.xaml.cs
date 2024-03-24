@@ -73,7 +73,6 @@ public partial class ViewBasePathDialog : TopLevelView
             return;
         }
 
-
         TextBoxWithSubmitButton.ExecuteCommandWithTextBoxText();
     }
 }

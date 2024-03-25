@@ -27,7 +27,7 @@ names.
 This is done using Steam's appdetails api (<https://store.steampowered.com/api/appdetails>).
 The filter `packages` is used to reduce network usage when possible.
 If it fails, another request using the filter `basic` is started.
-For more details on this see [Why is the packages filter used](#Why is the packages filter used).
+For more details on this see [Why is the packages filter used?](#why-is-the-packages-filter-used).
 
 If any apps cannot be resolved or multiple apps have the same name, you are prompted to resolve these apps manually.
 
@@ -35,7 +35,7 @@ If any apps cannot be resolved or multiple apps have the same name, you are prom
 
 Due to using WPF this application unfortunately only supports Windows.
 
-# Why is the packages filter used?
+## Why is the packages filter used?
 
 The appdetails api does not support requests for name only.
 The smallest filter containing the app name is `basic`.

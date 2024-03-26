@@ -5,7 +5,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <DockPanel Margin="16">
+                    <DockPanel>
                         <StackPanel DockPanel.Dock="Top" Orientation="Vertical" Margin="0,8,0,16">
                             <TextBlock FontSize="24" Margin="0,0,0,8"
                                        Text="{Binding RelativeSource={RelativeSource AncestorType=code:TopLevelView}, Path=Title}" />

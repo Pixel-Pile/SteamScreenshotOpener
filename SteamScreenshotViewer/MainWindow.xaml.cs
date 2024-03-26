@@ -1,5 +1,10 @@
 ﻿using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MaterialDesignColors;
+using MaterialDesignThemes.Wpf;
 using Serilog;
 using Serilog.Core;
 using SteamScreenshotViewer.Controls.Code;
@@ -22,6 +27,7 @@ public enum View
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
+[INotifyPropertyChanged]
 public partial class MainWindow : Window
 {
     private static ILogger log = Log.ForContext<MainWindow>();
@@ -33,7 +39,6 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
-
     private GameResolver gameResolver = new();
 
     public static readonly DependencyProperty CurrentViewProperty = DependencyProperty.Register(
@@ -44,6 +49,8 @@ public partial class MainWindow : Window
         get { return (TopLevelView)GetValue(CurrentViewProperty); }
         set { SetValue(CurrentViewProperty, value); }
     }
+
+    [ObservableProperty] private bool isDarkMode;
 
     private void HandleAutoResolveFinished()
     {
@@ -166,5 +173,22 @@ public partial class MainWindow : Window
         }
 
         return pathToASpecificGamesScreenshots.Substring(0, i);
+    }
+
+    private void OnThemeIconClick(object sender, MouseButtonEventArgs e)
+    {
+        var paletteHelper = new PaletteHelper();
+        Theme theme = paletteHelper.GetTheme();
+        if (IsDarkMode)
+        {
+            theme.SetDarkTheme();
+        }
+        else
+        {
+            theme.SetLightTheme();
+        }
+
+        paletteHelper.SetTheme(theme);
+        IsDarkMode = !IsDarkMode;
     }
 }

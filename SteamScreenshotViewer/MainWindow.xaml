@@ -4,12 +4,36 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SteamScreenshotViewer"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" MinWidth="800"
         SizeToContent="Width"
         Style="{StaticResource MaterialDesignWindow}"
         FontSize="{StaticResource GlobalFontSize}">
 
-    <ContentPresenter
-        Content="{Binding RelativeSource={RelativeSource AncestorType=local:MainWindow}, Path=CurrentView}" />
+    <Grid Margin="16">
+        <!-- grid to have solid square click hitbox
+        background must explicitly be set to transparent; otherwise clicking is ignored -->
+        <Grid ZIndex="2" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Background="Transparent"
+              PreviewMouseLeftButtonDown="OnThemeIconClick">
+            <materialDesign:PackIcon IsHitTestVisible="False" Width="28" Height="28"
+                                     Kind="ThemeLightDark">
+                <!-- <materialDesign:PackIcon.Style> -->
+                <!--     <Style TargetType="materialDesign:PackIcon"> -->
+                <!--         <Setter Property="Kind" Value="WbSunny" /> -->
+                <!--         <Style.Triggers> -->
+                <!--             <DataTrigger -->
+                <!--                 Binding="{Binding RelativeSource={RelativeSource AncestorType=local:MainWindow}, Path=IsDarkMode}" -->
+                <!--                 Value="False"> -->
+                <!--                 <Setter Property="Kind" Value="MoonWaxingCrescent" /> -->
+                <!--             </DataTrigger> -->
+                <!--         </Style.Triggers> -->
+                <!--     </Style> -->
+                <!-- </materialDesign:PackIcon.Style> -->
+            </materialDesign:PackIcon>
+        </Grid>
+
+        <ContentPresenter Grid.Row="0"
+                          Content="{Binding RelativeSource={RelativeSource AncestorType=local:MainWindow}, Path=CurrentView}" />
+    </Grid>
 </Window>

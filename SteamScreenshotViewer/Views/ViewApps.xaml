@@ -19,7 +19,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBox Margin="0,0,0,8"
+        <TextBox x:Name="TextBoxSearch" Margin="0,0,0,8"
                  Text="{Binding Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=SearchString}" />
         <ListView Grid.Row="1" MouseDoubleClick="OnAppClick" x:Name="ListViewApps"
                   ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=GameResolver.ObservedResolvedApps}">

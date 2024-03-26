@@ -15,7 +15,13 @@ public partial class ViewApps : TopLevelView
     public ViewApps(GameResolver resolver)
     {
         GameResolver = resolver;
+        this.Loaded += OnLoaded;
         InitializeComponent();
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        TextBoxSearch.Focus();
     }
 
     protected override void OnInitialized(EventArgs e)

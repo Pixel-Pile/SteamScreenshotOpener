@@ -83,6 +83,7 @@ If you want to take things into your own hands, this project is MIT-licensed and
 - [.Net (Core)](https://github.com/dotnet)
 - [WPF](https://github.com/dotnet/wpf)
 - [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
+- [Serilog](https://github.com/serilog/serilog)
 
 ## License
 

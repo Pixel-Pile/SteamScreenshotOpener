@@ -11,7 +11,13 @@
                                        Text="{Binding RelativeSource={RelativeSource AncestorType=code:TopLevelView}, Path=Title}" />
 
                             <ContentPresenter
-                                Content="{Binding RelativeSource={RelativeSource AncestorType=code:TopLevelView}, Path=Description}" />
+                                Content="{Binding RelativeSource={RelativeSource AncestorType=code:TopLevelView}, Path=Description}" >
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
                         </StackPanel>
 
                         <!-- dockpanel center -->

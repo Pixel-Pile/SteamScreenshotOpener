@@ -6,17 +6,16 @@
                    xmlns:local="clr-namespace:SteamScreenshotViewer.Views"
                    xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
                    xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code"
-                   mc:Ignorable="d"
-                   d:DesignHeight="300" d:DesignWidth="300">
+                   mc:Ignorable="d" Width="750">
 
     <code:TopLevelView.Title>
         Resolving App Names
     </code:TopLevelView.Title>
     <code:TopLevelView.Description>
-        <TextBlock Text="App names are resolved using the SteamAPI." />
+        <TextBlock Text="App names are resolved using Steam's API." />
     </code:TopLevelView.Description>
 
-    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+    <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,16">
         <TextBlock HorizontalAlignment="Center">
             <Run Text="Resolving App Names:" />
             <Run

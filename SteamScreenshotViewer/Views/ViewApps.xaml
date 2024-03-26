@@ -6,13 +6,12 @@
                    xmlns:views="clr-namespace:SteamScreenshotViewer.Views"
                    xmlns:model="clr-namespace:SteamScreenshotViewer.Model"
                    xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code"
-                   mc:Ignorable="d"
-                   d:DesignHeight="300" d:DesignWidth="300">
+                   mc:Ignorable="d">
     <code:TopLevelView.Title>
         Steam Apps
     </code:TopLevelView.Title>
     <code:TopLevelView.Description>
-        <TextBlock Text="Open screenshot Folder by double clicking" />
+        <TextBlock Text="Open the screenshot folder of any app by double clicking." />
     </code:TopLevelView.Description>
 
     <Grid>

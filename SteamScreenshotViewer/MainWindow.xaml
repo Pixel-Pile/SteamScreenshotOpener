@@ -4,9 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SteamScreenshotViewer"
-        xmlns:markupExtensions="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" MinWidth="900"
+        Title="MainWindow" Height="600" MinWidth="800"
         SizeToContent="Width"
         Style="{StaticResource MaterialDesignWindow}"
         FontSize="{StaticResource GlobalFontSize}">

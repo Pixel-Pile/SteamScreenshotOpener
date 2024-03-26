@@ -12,9 +12,17 @@
     </code:TopLevelView.Title>
     <code:TopLevelView.Description>
         <TextBlock>
-            <Run Text="Enter the full path to the screenshot directory of any game." />
+            <Run
+                Text="Enter the full path to the screenshot directory of any game." />
+            <LineBreak />
+            <Run Text="You can use Steam's built-in screenshot manager to open the screenshot directory of an app." />
             <LineBreak />
             <Run Text="You will only have to do this once." />
+            <LineBreak />
+            <LineBreak />
+            <Run Text="Example path:" />
+            <LineBreak />
+            <Run Text="C:\Program Files (x86)\Steam\userdata\your steam id\760\remote\app id\screenshots" />
         </TextBlock>
     </code:TopLevelView.Description>
 

@@ -28,43 +28,10 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        ConfigureLogger();
-        log.Information("program started");
-        AppDomain.CurrentDomain.UnhandledException += LogExceptionAndShutdown;
-        TaskScheduler.UnobservedTaskException += LogExceptionAndShutdown;
         gameResolver.AutoResolveFinished += HandleAutoResolveFinished;
         gameResolver.AppsFullyResolved += HandleAppsFullyResolved;
         InitializeComponent();
     }
-
-    private static void LogExceptionAndShutdown(Exception e)
-    {
-        log.Fatal(e, "unhandled exception");
-        Log.CloseAndFlush();
-        Application.Current.Shutdown();
-    }
-
-    private static void LogExceptionAndShutdown(object sender, UnhandledExceptionEventArgs e)
-    {
-        LogExceptionAndShutdown((Exception)e.ExceptionObject);
-    }
-
-    private static void LogExceptionAndShutdown(object? sender, UnobservedTaskExceptionEventArgs e)
-    {
-        LogExceptionAndShutdown(e.Exception);
-    }
-
-    public static void ConfigureLogger()
-    {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .WriteTo.File($"logs/{FormatDateTimeForFileName(DateTime.Now)}.log")
-            .CreateLogger();
-    }
-
-    public static string FormatDateTimeForFileName(DateTime time) => $"{time:yyyy-MM-dd_HH-mm-ss}";
 
 
     private GameResolver gameResolver = new();
@@ -101,6 +68,7 @@ public partial class MainWindow : Window
 
     public void DisplayView(View view)
     {
+        log.Information("loading view " + view);
         switch (view)
         {
             case View.Apps:

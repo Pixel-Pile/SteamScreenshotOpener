@@ -21,7 +21,6 @@ public partial class App : Application
         InitializeComponent();
     }
 
-
     private static void ConfigureLogger()
     {
         Log.Logger = new LoggerConfiguration()

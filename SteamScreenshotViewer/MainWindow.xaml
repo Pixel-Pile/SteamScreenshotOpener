@@ -6,10 +6,11 @@
         xmlns:local="clr-namespace:SteamScreenshotViewer"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" MinWidth="800"
+        Title="Steam Screenshot Viewer" Height="600" MinWidth="800"
         SizeToContent="Width"
         Style="{StaticResource MaterialDesignWindow}"
-        FontSize="{StaticResource GlobalFontSize}">
+        FontSize="{StaticResource GlobalFontSize}"
+        >
 
     <Grid Margin="16">
         <!-- grid to have solid square click hitbox

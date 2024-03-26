@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SteamScreenshotViewer.Helper;
@@ -18,14 +20,9 @@ public partial class UnresolvedSteamApp : SteamAppExtension
 {
     private readonly GameResolver _resolver;
 
-
-    public const string ConstDescriptionSteamDb = "Search ID on SteamDB";
-    public const string ConstDescriptionRetrySteamApi = "Retry Resolving with SteamAPI";
-    public const string ConstDescriptionOpenFolder = "Open Screenshot Folder";
-
-    public string DescriptionSteamDb => ConstDescriptionSteamDb;
-    public string DescriptionRetrySteamApi => ConstDescriptionRetrySteamApi;
-    public string DescriptionOpenFolder => ConstDescriptionOpenFolder;
+    public string DescriptionSteamDb => "Search ID on SteamDB";
+    public string DescriptionRetrySteamApi => "Retry Resolving with SteamAPI";
+    public string DescriptionOpenFolder => "Open Screenshot Folder";
 
     public UnresolvedSteamApp(ISteamApp app, FailureCause failureCause, GameResolver resolver) : base(app)
     {
@@ -43,15 +40,23 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     }
 
     [ObservableProperty] private FailureCause failureCause;
-    [ObservableProperty] private String nameCandidate = string.Empty;
+    [ObservableProperty] private string nameCandidate = string.Empty;
+    [ObservableProperty] private string cleanedNameCandidate = string.Empty;
     [ObservableProperty] private bool? nameCandidateValid;
     [ObservableProperty] private bool retrySteamApiCommandEnabled;
     private readonly bool inConstructor;
 
     partial void OnNameCandidateChanged(string? oldValue, string newValue)
     {
-        _resolver.ValidateNameCandidate(this);
+        CleanedNameCandidate = StringHelper.RemoveDuplicateWhitespace(newValue);
     }
+
+    partial void OnCleanedNameCandidateChanged(string? oldValue, string newValue)
+    {
+        _resolver.ValidateNameCandidate(this, oldValue);
+    }
+
+    
 
 
     partial void OnFailureCauseChanged(FailureCause value)

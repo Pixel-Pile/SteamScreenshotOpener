@@ -70,10 +70,10 @@ public static partial class SteamApiClient
       */
     private const string BaseRequestFilterPackages = @"https://store.steampowered.com/api/appdetails?filters=packages";
     private const string BaseRequestFilterBasic = @"https://store.steampowered.com/api/appdetails?filters=basic";
-    private const string ExtractNameFromPackageRegex = @"Buy\W(.*)";
+    private const string ExtractNameFromPackagePattern = @"Buy\W(.*)";
 
-    [GeneratedRegex(ExtractNameFromPackageRegex)]
-    private static partial Regex MyRegex();
+    [GeneratedRegex(ExtractNameFromPackagePattern)]
+    private static partial Regex ExtractNameFromPackagePatternRegex();
 
     private static string BuildRequestFilterPackages(string appId)
     {
@@ -147,7 +147,7 @@ public static partial class SteamApiClient
             string buyGamePackageName = packages[0]?["title"]?.ToString()
                                         ?? throw new NullReferenceException(
                                             "response json did not include package info");
-            Match match = MyRegex().Match(buyGamePackageName);
+            Match match = ExtractNameFromPackagePatternRegex().Match(buyGamePackageName);
             if (!match.Success)
             {
                 // retry with different filter

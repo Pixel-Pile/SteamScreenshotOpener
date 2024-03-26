@@ -33,7 +33,7 @@
             <Button Content="Commit all resolved names" Click="CommitAll" />
         </StackPanel>
         <ListView
-           KeyboardNavigation.TabNavigation="Continue"
+            KeyboardNavigation.TabNavigation="Continue"
             FontSize="{StaticResource GlobalFontSize}"
             ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Path=GameResolver.ObservedUnresolvedApps}">
             <ListView.Resources>
@@ -44,13 +44,13 @@
                     <Setter Property="CanContentScroll" Value="False" />
                 </Style>
                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                    <Setter Property="IsTabStop" Value="False"/>
+                    <Setter Property="IsTabStop" Value="False" />
                 </Style>
             </ListView.Resources>
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignGridViewItem}">
                     <!-- <Setter Property="Padding" Value="4"/> -->
-                    <Setter Property="IsTabStop" Value="False"/>
+                    <Setter Property="IsTabStop" Value="False" />
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                     <Setter Property="VerticalContentAlignment" Value="Center" />
                     <Setter Property="TextBlock.TextAlignment" Value="Center" />
@@ -74,8 +74,9 @@
                     <GridViewColumn Header="Name">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate DataType="{x:Type model:UnresolvedSteamApp}">
-                                <TextBox Text="{Binding NameCandidate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                         MinWidth="250" KeyDown="OnKeyDownHandler">
+                                <TextBox
+                                    Text="{Binding NameCandidate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    MinWidth="250" KeyDown="OnKeyDownHandler">
                                     <!-- VerticalAlignment="Center" HorizontalAlignment="Center"> -->
                                     <TextBox.Style>
                                         <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">

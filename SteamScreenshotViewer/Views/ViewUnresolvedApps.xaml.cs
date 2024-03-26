@@ -33,7 +33,7 @@ public partial class ViewUnresolvedApps : TopLevelView
         UnresolvedSteamApp[] unresolvedApps = GameResolver.UnresolvedApps.ToArray();
         foreach (UnresolvedSteamApp unresolvedApp in unresolvedApps)
         {
-            GameResolver.AttemptManualResolve(unresolvedApp, unresolvedApp.NameCandidate);
+            GameResolver.AttemptManualResolve(unresolvedApp);
         }
     }
 

@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -32,17 +30,12 @@ public partial class ViewApps : TopLevelView
 
     [ObservableProperty] private string searchString;
 
-    private string lowerCaseSearchString;
     private ICollectionView collectionView;
 
 
     partial void OnSearchStringChanged(string value)
     {
         // the filter method is invoked for every app in the collection
-        // by storing lowerCaseSearchString, searchString.ToLower()
-        // only has to be calculated when the string changed
-        // instead of for every single item
-        lowerCaseSearchString = SearchString.ToLower();
         if (string.IsNullOrEmpty(value))
         {
             collectionView.Filter = null;
@@ -54,7 +47,7 @@ public partial class ViewApps : TopLevelView
 
     private bool AppNameContainsSearchString(object app)
     {
-        return ((ResolvedSteamApp)app).LowerCaseName.Contains(lowerCaseSearchString);
+        return ((ResolvedSteamApp)app).Name.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     private void OnAppClick(object sender, MouseButtonEventArgs e)

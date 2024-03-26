@@ -83,22 +83,28 @@ public partial class GameResolver : ObservableObject
     }
 
 
-    /// <summary>
-    /// Returns whether the app has a unique name.
-    /// </summary>
-    /// <param name="duplicateToRemove">Can be null even if this method returns false.
-    /// Contains the app with the same name that was considered resolved until now.
-    /// </param>
-    /// <returns></returns>
-    public bool IsUnique(string name, out ResolvedSteamApp? duplicateToRemove)
+    private bool IsUniqueAndNotEmpty(string name, out ResolvedSteamApp? duplicateToRemove)
     {
-        if (string.IsNullOrEmpty(name) || name.Trim().Length == 0)
+        if (string.IsNullOrEmpty(name))
         {
             duplicateToRemove = null;
             return false;
         }
 
-        name = name.ToLower().Trim();
+        return IsUnique(name, out duplicateToRemove);
+    }
+
+    /// <summary>
+    /// Returns whether the app has a unique name.
+    /// </summary>
+    /// <param name="duplicateToRemove">
+    /// An app with the specified name that is considered resolved.
+    /// Such an app does not necessarily exist, even if the name is not unique
+    /// (duplicateToRemove can be null even if this method returns false).
+    /// </param>
+    /// <returns></returns>
+    private bool IsUnique(string name, out ResolvedSteamApp? duplicateToRemove)
+    {
         // name already detected as duplicate 
         // (this is at least the 3rd app with this name) 
         if (knownDuplicateNames.Contains(name))
@@ -108,7 +114,8 @@ public partial class GameResolver : ObservableObject
         }
 
         // search for earlier resolved app with same name
-        duplicateToRemove = ResolvedApps.FirstOrDefault(app => app.LowerCaseName == name);
+        duplicateToRemove =
+            ResolvedApps.FirstOrDefault(app => string.Compare(name, app.Name, StringComparison.OrdinalIgnoreCase) == 0);
         if (duplicateToRemove is not null)
         {
             knownDuplicateNames.Add(name);
@@ -118,30 +125,87 @@ public partial class GameResolver : ObservableObject
         return true;
     }
 
-    public void ValidateNameCandidate(UnresolvedSteamApp appToVerify)
+    /// <summary>
+    /// Validates an app's NameCandidate.
+    /// Invalidates any duplicate NameCandidates.
+    /// Revalidates duplicates of the previous NameCandidate.
+    /// </summary>
+    /// <param name="appToVerify">The app whose NameCandidate should be validated.</param>
+    /// <param name="oldCleanedNameCandidate">The previous value of the app's CleanedNameCandidate.</param>
+    public void ValidateNameCandidate(UnresolvedSteamApp appToVerify, string? oldCleanedNameCandidate)
     {
-        if (!IsUnique(appToVerify.NameCandidate, out ResolvedSteamApp? _))
+        if (string.IsNullOrEmpty(appToVerify.CleanedNameCandidate))
+        {
+            appToVerify.NameCandidateValid = false;
+        }
+
+        if (!IsUniqueAndNotEmpty(appToVerify.CleanedNameCandidate, out ResolvedSteamApp? _))
         {
             appToVerify.NameCandidateValid = false;
             return;
         }
 
-        foreach (UnresolvedSteamApp app in UnresolvedApps)
-        {
-            if (app.NameCandidate.ToLower().Trim() == appToVerify.NameCandidate.ToLower().Trim())
-            {
-                if (app == appToVerify)
-                {
-                    continue;
-                }
+        ValidateNameCandidateAgainstUnresolvedApps(appToVerify, oldCleanedNameCandidate);
+    }
 
-                app.NameCandidateValid = false;
+    /// <summary>
+    /// Validates an app's NameCandidate against the NameCandidates of all unresolved apps.
+    /// The result of this operation is stored in <see cref="UnresolvedSteamApp.NameCandidateValid"/>.
+    /// <br />
+    /// If any unresolved app has the same CandidateName, both apps have their CandidateName invalidated.
+    /// If there is exactly 1 app whose NameCandidate used to be a duplicate of appToVerify's previous NameCandidate,
+    /// it is revalidated.
+    /// </summary>
+    /// <param name="appToVerify">The app whose NameCandidate should be validated.</param>
+    /// <param name="oldCleanedNameCandidate">The previous value of the app's CleanedNameCandidate.</param>
+    private void ValidateNameCandidateAgainstUnresolvedApps(UnresolvedSteamApp appToVerify,
+        string? oldCleanedNameCandidate)
+    {
+        int appsWithOldNameCandidateCount = 0;
+        UnresolvedSteamApp? lastAppWithOldNameCandidate = null;
+        bool unique = true;
+        foreach (UnresolvedSteamApp currentApp in UnresolvedApps)
+        {
+            if (currentApp == appToVerify)
+            {
+                continue;
+            }
+
+            // search for unresolved apps whose nameCandidate is invalid
+            // because it was a duplicate of the previous nameCandidate of appToVerify
+            if (string.Compare(oldCleanedNameCandidate, currentApp.CleanedNameCandidate,
+                    StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                appsWithOldNameCandidateCount++;
+                lastAppWithOldNameCandidate = currentApp;
+                // oldName != nameToVerify
+                // currentName == oldName => currentName != nameToVerify
+                // -> skip comparison with nameToVerify
+                continue;
+            }
+
+            // search for duplicate nameCandidate
+            if (string.Compare(appToVerify.CleanedNameCandidate, currentApp.CleanedNameCandidate,
+                    StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                unique = false;
+                currentApp.NameCandidateValid = false;
                 appToVerify.NameCandidateValid = false;
-                return;
             }
         }
 
-        appToVerify.NameCandidateValid = true;
+        if (appsWithOldNameCandidateCount == 1)
+        {
+            if (IsUniqueAndNotEmpty(lastAppWithOldNameCandidate!.CleanedNameCandidate, out var _))
+            {
+                lastAppWithOldNameCandidate.NameCandidateValid = true;
+            }
+        }
+
+        if (unique)
+        {
+            appToVerify.NameCandidateValid = true;
+        }
     }
 
     /// <summary>
@@ -151,7 +215,7 @@ public partial class GameResolver : ObservableObject
     /// </summary>
     private void AddResolvedAppCandidate(ResolvedSteamApp resolvedApp, bool addToCache)
     {
-        if (IsUnique(resolvedApp.Name, out ResolvedSteamApp? duplicateToRemove))
+        if (IsUniqueAndNotEmpty(resolvedApp.Name, out ResolvedSteamApp? duplicateToRemove))
         {
             AddResolved(resolvedApp, addToCache);
         }
@@ -242,12 +306,12 @@ public partial class GameResolver : ObservableObject
         }
     }
 
-    public bool AttemptManualResolve(UnresolvedSteamApp unresolvedApp, string unresolvedAppName)
+    public bool AttemptManualResolve(UnresolvedSteamApp unresolvedApp)
     {
         switch (unresolvedApp.NameCandidateValid)
         {
             case true:
-                ResolvedSteamApp resolvedApp = new ResolvedSteamApp(unresolvedApp, unresolvedApp.NameCandidate);
+                ResolvedSteamApp resolvedApp = new ResolvedSteamApp(unresolvedApp, unresolvedApp.CleanedNameCandidate);
                 RemoveUnresolved(unresolvedApp);
                 AddResolved(resolvedApp, true);
                 if (UnresolvedApps.Count == 0)
@@ -264,7 +328,7 @@ public partial class GameResolver : ObservableObject
                 return false;
             case null:
                 throw new InvalidOperationException(
-                    $"{nameof(UnresolvedSteamApp.NameCandidateValid)} was null after call to {nameof(ValidateNameCandidate)}");
+                    $"{nameof(UnresolvedSteamApp.NameCandidateValid)} was null");
         }
     }
 
@@ -276,6 +340,6 @@ public partial class GameResolver : ObservableObject
             return;
         }
 
-        AttemptManualResolve(unresolvedApp, unresolvedApp.NameCandidate);
+        AttemptManualResolve(unresolvedApp);
     }
 }

@@ -1,8 +1,8 @@
 ﻿# SteamScreenshotViewer
 
 This is a small app to open the screenshot directories of any Steam application.
-**Screenshots cannot be viewed directly inside the app**. 
-(I originally planned to implement this, hence the name).
+**Screenshots cannot be viewed directly inside the app.**
+(I originally planned to implement this, hence the name.)
 
 ## Why?
 
@@ -30,6 +30,11 @@ If it fails, another request using the filter `basic` is started.
 For more details on this see [Why is the packages filter used?](#why-is-the-packages-filter-used).
 
 If any apps cannot be resolved or multiple apps have the same name, you are prompted to resolve these apps manually.
+
+## State of this Repository
+
+The app is deemed feature-complete.
+I am not planning to add any major features.
 
 ## Supported Platforms
 
@@ -75,8 +80,9 @@ If you want to delete all manually set names, delete the `cache.json` file entir
 ### Other Problems
 
 You're welcome to open an issue in this repository.
-_It might take a long time for me to reply, and I might not fix your issue._
-If you want to take things into your own hands, this project is MIT-licensed and you can fork and freely develop it.
+_It might take a long time for me to reply, and not all issue will necessarily get fixed._
+If you want to take things into your own hands, this project is using the MIT license - you can fork and freely develop
+it.
 
 ## Used Technologies
 

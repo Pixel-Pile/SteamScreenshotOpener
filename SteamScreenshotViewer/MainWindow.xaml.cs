@@ -57,11 +57,6 @@ public partial class MainWindow : Window
         Application.Current.Dispatcher.Invoke(() =>
         {
             Thread.MemoryBarrier();
-            if (gameResolver.UnresolvedApps.Count == 0)
-            {
-                DisplayView(View.Apps);
-            }
-            else
             {
                 DisplayView(View.UnresolvedApps);
             }

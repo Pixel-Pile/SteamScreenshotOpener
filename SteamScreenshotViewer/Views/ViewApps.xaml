@@ -6,26 +6,56 @@
                    xmlns:views="clr-namespace:SteamScreenshotViewer.Views"
                    xmlns:model="clr-namespace:SteamScreenshotViewer.Model"
                    xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code"
-                   mc:Ignorable="d">
+                   mc:Ignorable="d"
+                   Width="800">
     <code:TopLevelView.Title>
-        Steam Apps
+        Open Screenshot Folder
     </code:TopLevelView.Title>
     <code:TopLevelView.Description>
-        <TextBlock Text="Open the screenshot folder of any app by double clicking." />
+        <TextBlock Text="Filter apps using the textbox below." />
     </code:TopLevelView.Description>
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBox x:Name="TextBoxSearch" Margin="0,0,0,8"
+        <Expander 
+            HorizontalAlignment="Left" Header="Details"
+            ExpandDirection="Down">
+            <TextBlock TextWrapping="Wrap">
+                <Run Text="Mouse:" />
+                <LineBreak />
+                <Run Text="Double-click a list item to open its screenshot folder." />
+                <LineBreak />
+                <LineBreak />
+                <Run Text="KeyBoard:" />
+                <LineBreak />
+                <Run Text="Pressing Enter while inside the textbox will open the first app in the list." />
+                <Run Text="You can switch focus from textbox to listview by pressing down." />
+                <Run Text="Pressing enter while a list item is selected will open its screenshot folder." />
+                <LineBreak />
+                <LineBreak />
+                <Run Text="Bugs:" />
+                <LineBreak />
+                <Run Text="This list should contain all apps that you have taken a screenshot in." />
+                <Run Text="If any apps are missing or have incorrect names see " />
+                <Hyperlink NavigateUri="https://github.com/Pixel-Pile/SteamScreenshotViewer?tab=readme-ov-file#troubleshooting"
+                           RequestNavigate="OpenHyperlink" Foreground="#0085ef">Troubleshooting</Hyperlink>
+            </TextBlock>
+
+        </Expander>
+
+        <TextBox Grid.Row="1" x:Name="TextBoxSearch" Margin="0,0,0,8"
+                 PreviewKeyDown="TextBoxOnKeyDownHandler"
                  Text="{Binding Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=SearchString}" />
-        <ListView Grid.Row="1" MouseDoubleClick="OnAppClick" x:Name="ListViewApps"
+        <ListView Grid.Row="2" PreviewKeyDown="ItemKeyDownHandler"
+                  MouseDoubleClick="OnAppClick" x:Name="ListViewApps"
                   ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=GameResolver.ObservedResolvedApps}">
             <ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type model:ResolvedSteamApp}">
-                    <TextBlock Text="{Binding Path=Name}" />
+                    <TextBlock Text="{Binding Path=Name}" PreviewKeyDown="ItemKeyDownHandler" />
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

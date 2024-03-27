@@ -62,6 +62,7 @@
                     <GridView.ColumnHeaderContainerStyle>
                         <Style TargetType="GridViewColumnHeader"
                                BasedOn="{StaticResource {x:Type GridViewColumnHeader}}">
+                            <!-- see overrides.xaml -->
                             <Setter Property="Padding" Value="12,4,4,4" />
                             <Setter Property="HorizontalAlignment" Value="Center" />
                             <Setter Property="HorizontalContentAlignment" Value="Center" />

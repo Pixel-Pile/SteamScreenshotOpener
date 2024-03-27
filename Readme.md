@@ -4,12 +4,27 @@ This is a small app to open the screenshot directories of any Steam application.
 **Screenshots cannot be viewed directly inside the app.**
 (I originally planned to implement this, hence the name.)
 
-## Why?
+## Which .exe?
+
+Every release contains 2 .exe files:
+
+- Selfcontained_SteamScreenshotViewer
+    - Use this if you have no .Net runtime installed.
+- DotnetRuntimeRequired_SteamScreenshotViewer
+    - Use this if you have a .Net runtime installed. If you encounter any issues, try the self-contained version
+      instead.
+
+## State of this Repository
+
+The app is deemed feature-complete.
+I am not planning to add any major features.
+
+## Why does this exist?
 
 Steam's builtin screenshot manager started crashing a lot for me after they overhauled the UI.
 And every time it crashes, it takes all of Steam down with it.
 
-## How?
+## How does it work?
 
 When started for the first time, you are prompted to enter the full path to the screenshot directory of any steam app.
 To do so, just open the Steam screenshot manager, select any game, and click the folder icon at the top to open the
@@ -30,11 +45,6 @@ If it fails, another request using the filter `basic` is started.
 For more details on this see [Why is the packages filter used?](#why-is-the-packages-filter-used).
 
 If any apps cannot be resolved or multiple apps have the same name, you are prompted to resolve these apps manually.
-
-## State of this Repository
-
-The app is deemed feature-complete.
-I am not planning to add any major features.
 
 ## Supported Platforms
 

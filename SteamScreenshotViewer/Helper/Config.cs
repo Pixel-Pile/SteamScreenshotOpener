@@ -7,7 +7,7 @@ public class Config
 {
     private static ILogger log = Log.ForContext<Config>();
 
-    public const string configPath = "storage/Config.json";
+    public const string configPath = "storage/config.json";
 
     public static Config Instance => GetInstance();
 

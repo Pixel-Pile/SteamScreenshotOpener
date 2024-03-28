@@ -35,7 +35,7 @@ public partial class App : Application
     {
         log.Fatal(e, "unhandled exception");
         Log.CloseAndFlush();
-        Application.Current.Shutdown();
+        Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
     }
 
     private static void LogExceptionAndShutdown(object sender, UnhandledExceptionEventArgs e)

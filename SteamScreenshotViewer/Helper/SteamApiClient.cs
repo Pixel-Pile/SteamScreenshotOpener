@@ -33,7 +33,7 @@ public static partial class SteamApiClient
               ],
               "package_groups": [
                 {
-                  "name": "default",
+                  "name": "default",    <-- packages response is only used if this is "default"
                   "title": "Buy Counter-Strike 2",  <--- this is parsed for app name
                   "description": "",
                   "selection_text": "Select a purchase option",
@@ -70,10 +70,10 @@ public static partial class SteamApiClient
       */
     private const string BaseRequestFilterPackages = @"https://store.steampowered.com/api/appdetails?filters=packages";
     private const string BaseRequestFilterBasic = @"https://store.steampowered.com/api/appdetails?filters=basic";
-    private const string ExtractNameFromPackagePattern = @"Buy\W(.*)";
+    private const string ExtractNameFromPackageTitlePattern = @"Buy\W(.*)";
 
-    [GeneratedRegex(ExtractNameFromPackagePattern)]
-    private static partial Regex ExtractNameFromPackagePatternRegex();
+    [GeneratedRegex(ExtractNameFromPackageTitlePattern)]
+    private static partial Regex ExtractNameFromPackageTitleRegex();
 
     private static string BuildRequestFilterPackages(string appId)
     {
@@ -133,10 +133,10 @@ public static partial class SteamApiClient
                 return ApiResponse.Failure(FailureCause.SteamApi);
             }
 
-            JsonArray packages = ((JsonArray?)dataNode["package_groups"])
-                                 ?? throw new NullReferenceException(
-                                     "response json did not contain package_groups node");
-            if (packages.Count == 0)
+            JsonArray packageGroups = ((JsonArray?)dataNode["package_groups"])
+                                      ?? throw new NullReferenceException(
+                                          "response json did not contain package_groups node");
+            if (packageGroups.Count == 0)
             {
                 // no package options -> app free or no longer sold on steam
                 // success was true meaning api does still have data on that id
@@ -144,17 +144,28 @@ public static partial class SteamApiClient
                 return ApiResponse.Retry();
             }
 
-            string buyGamePackageName = packages[0]?["title"]?.ToString()
+            JsonNode firstPackage = packageGroups[0]
+                                    ?? throw new NullReferenceException(
+                                        "first package group of response json was null");
+            JsonNode packageName = firstPackage["name"] ?? throw new NullReferenceException(
+                "response json did not contain name node");
+
+            if (packageName.ToString() != "default")
+            {
+                return ApiResponse.Retry();
+            }
+
+            string packageTitle = firstPackage["title"]?.ToString()
                                         ?? throw new NullReferenceException(
-                                            "response json did not include package info");
-            Match match = ExtractNameFromPackagePatternRegex().Match(buyGamePackageName);
-            if (!match.Success)
+                                            "first package group did not contain title node");
+            Match appTitleMatch = ExtractNameFromPackageTitleRegex().Match(packageTitle);
+            if (!appTitleMatch.Success)
             {
                 // retry with different filter
                 return ApiResponse.Retry();
             }
 
-            return ApiResponse.Success(match.Groups[1].Value);
+            return ApiResponse.Success(appTitleMatch.Groups[1].Value);
         }
         catch (NullReferenceException e)
         {

@@ -1,13 +1,11 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+using System.Windows.Threading;
 using Serilog;
+using SteamScreenshotViewer.Constants;
+using SteamScreenshotViewer.Views;
 
 namespace SteamScreenshotViewer;
 
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
 public partial class App : Application
 {
     private static ILogger log = Log.ForContext<App>();
@@ -16,8 +14,9 @@ public partial class App : Application
     {
         ConfigureLogger();
         log.Information("program started");
-        AppDomain.CurrentDomain.UnhandledException += LogExceptionAndShutdown;
-        TaskScheduler.UnobservedTaskException += LogExceptionAndShutdown;
+        AppDomain.CurrentDomain.UnhandledException += OnUnhandledAppDomainException;
+        Dispatcher.UnhandledException += OnUnhandledDispatcherException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
         InitializeComponent();
     }
 
@@ -27,25 +26,48 @@ public partial class App : Application
             .MinimumLevel.Debug()
             .Enrich.FromLogContext()
             .WriteTo.Console()
-            .WriteTo.File($"logs/{FormatDateTimeForFileName(DateTime.Now)}.log")
+            .WriteTo.File($"{Paths.LogsDir}/{FormatDateTimeForFileName(DateTime.Now)}.log")
             .CreateLogger();
     }
 
-    private static void LogExceptionAndShutdown(Exception e)
+    private static bool openedCrashWindow;
+
+    private static void ShowCrashWindow()
     {
-        log.Fatal(e, "unhandled exception");
+        Current.Dispatcher.Invoke(() =>
+        {
+            // prevent more than 1 crash window from opening
+            if (!openedCrashWindow)
+            {
+                openedCrashWindow = true;
+                new CrashView().ShowDialog();
+            }
+        });
+    }
+
+    private static void OnUnhandledDispatcherException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        // this handler does not appear to be invoked ever? maybe debug side effects
+        e.Handled = true;
+        log.Fatal(e.Exception, "unhandled exception on dispatcher thread");
         Log.CloseAndFlush();
-        Application.Current.Dispatcher.Invoke(Application.Current.Shutdown);
+        ShowCrashWindow();
     }
 
-    private static void LogExceptionAndShutdown(object sender, UnhandledExceptionEventArgs e)
+    private void OnUnhandledAppDomainException(object sender, UnhandledExceptionEventArgs e)
     {
-        LogExceptionAndShutdown((Exception)e.ExceptionObject);
+        // apparently also triggered on dispatcher exceptions? maybe debug side effects
+        log.Fatal(e.ExceptionObject as Exception, "unhandled app domain exception");
+        Log.CloseAndFlush();
+        ShowCrashWindow();
     }
 
-    private static void LogExceptionAndShutdown(object? sender, UnobservedTaskExceptionEventArgs e)
+    private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        LogExceptionAndShutdown(e.Exception);
+        log.Fatal(e.Exception, "unobserved task exception");
+        e.SetObserved();
+        Log.CloseAndFlush();
+        ShowCrashWindow();
     }
 
 

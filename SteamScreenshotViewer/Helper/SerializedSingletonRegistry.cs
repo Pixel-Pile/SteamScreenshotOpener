@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
 using Serilog;
+using SteamScreenshotViewer.Constants;
 
 namespace SteamScreenshotViewer.Helper;
 
@@ -18,8 +19,8 @@ public class SerializedSingletonRegistry
         // types cannot register themselves
         // because their code can only ever be executed after they were loaded
         // -> e.g. static constructors won't necessarily be executed
-        RegisterType<Config>(Config.configPath);
-        RegisterType<Cache>(Cache.cachePath);
+        RegisterType<Config>(Paths.ConfigFile);
+        RegisterType<Cache>(Paths.CacheFile);
     }
 
     public static void RegisterType<T>(string path)

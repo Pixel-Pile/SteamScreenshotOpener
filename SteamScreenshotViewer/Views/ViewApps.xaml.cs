@@ -8,6 +8,7 @@ using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
 using SteamScreenshotViewer.Controls.Code;
+using SteamScreenshotViewer.Helper;
 using SteamScreenshotViewer.Model;
 using GameResolver = SteamScreenshotViewer.Helper.GameResolver;
 
@@ -63,7 +64,7 @@ public partial class ViewApps : TopLevelView
 
     private void OpenScreenShotFolder(ResolvedSteamApp app)
     {
-        Process.Start("explorer.exe", app.ScreenshotsPath);
+        ExplorerHelper.OpenExplorerAtPath(app.ScreenshotsPath);
     }
 
     private void OnAppClick(object sender, MouseButtonEventArgs e)
@@ -171,6 +172,6 @@ public partial class ViewApps : TopLevelView
 
     private void OpenHyperlink(object sender, RequestNavigateEventArgs e)
     {
-        Process.Start(new ProcessStartInfo(e.Uri.ToString()) { UseShellExecute = true });
+        HyperlinkHelper.OpenHyperlink(e);
     }
 }

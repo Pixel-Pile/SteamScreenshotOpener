@@ -8,8 +8,6 @@ public class Config
 {
     private static ILogger log = Log.ForContext<Config>();
 
-    public const string configPath = "storage/config.json";
-
     public static Config Instance => GetInstance();
 
     private static Config GetInstance()
@@ -49,6 +47,7 @@ public class Config
     }
 
     private bool _isDarkMode;
+
     public bool IsDarkMode
     {
         get
@@ -67,10 +66,5 @@ public class Config
     public void PostAndSerialize()
     {
         SerializedSingletonRegistry.PostAndSerialize<Config>(this, true);
-    }
-
-    public static bool Exists()
-    {
-        return Path.Exists(configPath);
     }
 }

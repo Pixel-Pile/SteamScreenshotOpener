@@ -77,7 +77,7 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     [RelayCommand]
     private Task OpenScreenshotFolder()
     {
-        Process.Start("explorer.exe", ScreenshotsPath);
+        ExplorerHelper.OpenExplorerAtPath(ScreenshotsPath);
         return Task.CompletedTask;
     }
 

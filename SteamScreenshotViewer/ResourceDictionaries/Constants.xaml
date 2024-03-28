@@ -1,0 +1,6 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- would not override hover if applied through a style -->
+    <SolidColorBrush x:Key="HyperlinkForeground">#0085ef</SolidColorBrush>
+</ResourceDictionary>

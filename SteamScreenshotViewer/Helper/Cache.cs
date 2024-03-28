@@ -8,8 +8,6 @@ public class Cache
 {
     private static ILogger log = Log.ForContext<Cache>();
 
-    public const string cachePath = @"storage/cache.json";
-
     public static Cache Instance => GetInstance();
 
     public ConcurrentDictionary<string, string> NamesByAppId { get; set; } = new();

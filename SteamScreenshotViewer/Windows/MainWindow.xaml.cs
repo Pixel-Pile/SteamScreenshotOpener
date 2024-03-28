@@ -55,13 +55,7 @@ public partial class MainWindow : Window
 
     private void HandleAutoResolveFinished()
     {
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            Thread.MemoryBarrier();
-            {
-                DisplayView(View.UnresolvedApps);
-            }
-        });
+        Application.Current.Dispatcher.Invoke(() => DisplayView(View.UnresolvedApps));
     }
 
     private void HandleAppsFullyResolved()

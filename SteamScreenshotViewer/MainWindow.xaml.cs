@@ -36,6 +36,7 @@ public partial class MainWindow : Window
     {
         gameResolver.AutoResolveFinished += HandleAutoResolveFinished;
         gameResolver.AppsFullyResolved += HandleAppsFullyResolved;
+        LoadThemeSpecifiedByConfig();
         InitializeComponent();
     }
 
@@ -125,7 +126,7 @@ public partial class MainWindow : Window
 
     private void HandleGameSpecificPathSubmitted(string gameSpecificScreenshotPath)
     {
-        Config config = new Config();
+        Config config = Config.Instance;
         config.ScreenshotBasePath = ResolveBasePath(gameSpecificScreenshotPath);
         config.PostAndSerialize();
         DisplayView(View.Loading);
@@ -134,7 +135,8 @@ public partial class MainWindow : Window
 
     private void Start()
     {
-        if (!Config.Exists())
+        Config config = Config.Instance;
+        if (config.ScreenshotBasePath is null)
         {
             DisplayView(View.BasePathDialog);
             return;
@@ -170,11 +172,11 @@ public partial class MainWindow : Window
         return pathToASpecificGamesScreenshots.Substring(0, i);
     }
 
-    private void OnThemeIconClick(object sender, MouseButtonEventArgs e)
+    private static void LoadTheme(bool isDarkMode)
     {
-        var paletteHelper = new PaletteHelper();
+        PaletteHelper paletteHelper = new PaletteHelper();
         Theme theme = paletteHelper.GetTheme();
-        if (IsDarkMode)
+        if (isDarkMode)
         {
             theme.SetDarkTheme();
         }
@@ -184,6 +186,21 @@ public partial class MainWindow : Window
         }
 
         paletteHelper.SetTheme(theme);
+    }
+
+    private void LoadThemeSpecifiedByConfig()
+    {
+        Config config = Config.Instance;
+        IsDarkMode = config.IsDarkMode;
+        LoadTheme(config.IsDarkMode);
+    }
+
+    private void OnThemeIconClick(object sender, MouseButtonEventArgs e)
+    {
         IsDarkMode = !IsDarkMode;
+        LoadTheme(IsDarkMode);
+        Config config = Config.Instance;
+        config.IsDarkMode = IsDarkMode;
+        config.PostAndSerialize();
     }
 }

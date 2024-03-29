@@ -2,36 +2,50 @@
 
 namespace SteamScreenshotViewer.Core;
 
+public enum ResponseState
+{
+    InvalidEnumValue = 0,
+    Success,
+    FailureSkipApp,
+    FailureRetryApp,
+    CancelAll
+}
+
 public class ApiResponse
 {
-    private static ApiResponse _retryReponse = new ApiResponse(false, null, null, true);
+    private static ApiResponse _retryReponse = new(ResponseState.FailureRetryApp, null, null);
 
-    private ApiResponse(bool containsName, string? name, FailureCause? failureCause, bool shouldRetry)
+    private static ApiResponse _cancelAllResponse = new(ResponseState.CancelAll, null, Model.FailureCause.Network);
+
+
+    private ApiResponse(ResponseState responseState, string? name, FailureCause? failureCause)
     {
-        ContainsName = containsName;
         Name = name;
         FailureCause = failureCause;
-        ShouldRetry = shouldRetry;
+        ResponseState = responseState;
     }
 
     public static ApiResponse Success(string name)
     {
-        return new ApiResponse(true, name, null, false);
+        return new ApiResponse(ResponseState.Success, name, null);
     }
 
-    public static ApiResponse Failure(FailureCause failureCause)
-    {
-        return new ApiResponse(false, null, failureCause, false);
-    }
-
-    public static ApiResponse Retry()
+    public static ApiResponse RetryApp()
     {
         return _retryReponse;
     }
 
-    public bool ContainsName { get; }
-    public string? Name { get; }
-    public FailureCause? FailureCause { get; }
+    public static ApiResponse SkipApp(FailureCause failureCause)
+    {
+        return new ApiResponse(ResponseState.FailureSkipApp, null, failureCause);
+    }
 
-    public bool ShouldRetry { get; }
+    public static ApiResponse CancelAll()
+    {
+        return _cancelAllResponse;
+    }
+
+    public ResponseState ResponseState { get; }
+    public FailureCause? FailureCause { get; }
+    public string? Name { get; }
 }

@@ -45,7 +45,7 @@ public class ConcurrentDownloader
             // task is already completed; wait just to rethrow exceptions
             (ISteamApp app, ApiResponse response) = await completedTask;
 
-            resolver.HandleApiResponse(app, response);
+            await resolver.HandleApiResponse(app, response);
 
             ResolveAppsUntilOneRequestIsMade(apiResponseTasks);
         }

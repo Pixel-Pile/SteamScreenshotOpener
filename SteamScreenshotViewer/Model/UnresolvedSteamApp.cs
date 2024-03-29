@@ -59,8 +59,6 @@ public partial class UnresolvedSteamApp : SteamAppExtension
         _resolver.ValidateNameCandidate(this, oldValue);
     }
 
-    
-
 
     partial void OnFailureCauseChanged(FailureCause value)
     {
@@ -99,8 +97,9 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     [RelayCommand(CanExecute = nameof(RetrySteamApiCommandEnabled))]
     private async Task RetrySteamApi()
     {
+        //FIXME
         ApiResponse response = await SteamApiClient.GetAppNameAsync(Id);
-        if (response.ContainsName)
+        if (response.ResponseState == ResponseState.Success)
         {
             NameCandidate = response.Name!;
         }

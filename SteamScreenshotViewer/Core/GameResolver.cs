@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Serilog;
 using SteamScreenshotViewer.Model;
 
 namespace SteamScreenshotViewer.Core;
@@ -12,6 +13,7 @@ public partial class GameResolver : ObservableObject
 {
     //TODO inotify required for the collections? (would signal replacement of entire data structure)
 
+    private static ILogger log = Log.ForContext<GameResolver>();
     public ObservableCollection<ResolvedSteamApp> ObservedResolvedApps { get; set; } = new();
     public ObservableCollection<UnresolvedSteamApp> ObservedUnresolvedApps { get; set; } = new();
 
@@ -45,8 +47,18 @@ public partial class GameResolver : ObservableObject
     {
         List<ISteamApp> apps = SearchApps();
         ConcurrentDownloader concurrentDownloader = new ConcurrentDownloader(this, apps);
-        await concurrentDownloader.ResolveAppNames();
-        Thread.MemoryBarrier();
+        try
+        {
+            await concurrentDownloader.ResolveAppNames();
+        }
+        catch (CancelRequestsException e)
+        {
+            log.Warning("requests were cancelled");
+            Cache.Instance.PostAndSerialize();
+            AutoResolveFailed?.Invoke();
+            return;
+        }
+
         AutoResolveFinishedPartialSuccess?.Invoke();
         if (UnresolvedApps.Count == 0)
         {
@@ -236,18 +248,51 @@ public partial class GameResolver : ObservableObject
     }
 
 
-    public void HandleApiResponse(ISteamApp app, ApiResponse response)
+    public async Task HandleApiResponse(ISteamApp app, ApiResponse response)
     {
-        if (!response.ContainsName)
+        switch (response.ResponseState)
         {
-            Debug.Assert(response.FailureCause != null);
-            HandleUnresolvedApp(new UnresolvedSteamApp(app, response.FailureCause!.Value, this));
-            return;
+            case ResponseState.Success:
+                // name found
+                HandleNewlyResolvedApp(new ResolvedSteamApp(app, response.Name!));
+                break;
+            case ResponseState.FailureSkipApp:
+                Debug.Assert(response.FailureCause != null);
+                HandleUnresolvedApp(new UnresolvedSteamApp(app, response.FailureCause!.Value, this));
+                break;
+            case ResponseState.FailureRetryApp:
+                log.Error($"ResponseState was {ResponseState.FailureRetryApp} in {nameof(HandleApiResponse)}");
+                Debug.Assert(false);
+                break;
+            case ResponseState.CancelAll:
+                await StallButThrowIfRepeatedFailure();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private int cancelRequestCount = 0;
+    private const int CancelRequestLimit = 3;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="milliseconds"></param>
+    /// <exception cref="CancelRequestsException"></exception>
+    private async Task StallButThrowIfRepeatedFailure(int milliseconds = 1000)
+    {
+        cancelRequestCount++;
+
+        if (cancelRequestCount >= CancelRequestLimit)
+        {
+            throw new CancelRequestsException("cancel request limit reached (network failure)");
         }
 
-        // name found
-        HandleNewlyResolvedApp(new ResolvedSteamApp(app, response.Name!));
+        // stall/wait before trying next app
+        await Task.Delay(milliseconds);
     }
+
 
     private string GetAppIdFromScreenshotDirectoryPath(string directory)
     {

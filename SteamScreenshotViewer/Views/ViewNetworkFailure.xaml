@@ -28,15 +28,18 @@
         </TextBlock>
     </code:TopLevelView.Description>
 
-    <StackPanel Orientation="Vertical">
+    <StackPanel Margin="8" Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
-            <Button Click="TestConnection">Test connection to Steam API</Button>
-            <TextBlock>
+            <Button Click="TestConnection"
+                    VerticalAlignment="Center">
+                Test connection to Steam API
+            </Button>
+            <TextBlock Margin="8,0,0,0" VerticalAlignment="Center">
                 <Run Text="API response: " />
                 <Run
                     Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewNetworkFailure}, Path=ApiResponse}" />
             </TextBlock>
         </StackPanel>
-        <Button Click="RetryAutoResolve">Retry name resolution</Button>
+        <Button Margin="0,8,0,0" Click="RetryAutoResolve">Restart name resolution</Button>
     </StackPanel>
 </code:TopLevelView>

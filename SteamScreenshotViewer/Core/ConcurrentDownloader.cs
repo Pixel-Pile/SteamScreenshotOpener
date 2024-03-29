@@ -1,17 +1,25 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using Serilog;
 using SteamScreenshotViewer.Model;
 
 namespace SteamScreenshotViewer.Core;
 
 public class ConcurrentDownloader
 {
+    private static ILogger log = Log.ForContext<ConcurrentDownloader>();
     private const int ConcurrentDownloads = 10;
+    private const int DistinctFailureLimit = 3;
 
     private readonly GameResolver resolver;
+    
     private readonly List<ISteamApp> apps;
-    private int handledAppsTotal;
     private readonly ConcurrentDictionary<string, string> cachedNamesById;
+    private int handledAppsTotal;
+    
+    private int distinctFailureCount;
+    private DateTime distinctFailureTime = DateTime.MinValue;
+    private static readonly TimeSpan FailureDelay = TimeSpan.FromMilliseconds(500);
 
     public ConcurrentDownloader(GameResolver resolver, List<ISteamApp> apps)
     {
@@ -44,6 +52,11 @@ public class ConcurrentDownloader
 
             // task is already completed; wait just to rethrow exceptions
             (ISteamApp app, ApiResponse response) = await completedTask;
+
+            if (response.ResponseState == ResponseState.CancelAll)
+            {
+                await StallThrowIfRepeatedFailure(response);
+            }
 
             resolver.HandleApiResponse(app, response);
 
@@ -81,8 +94,53 @@ public class ConcurrentDownloader
 
     private void ResolveByRequest(ISteamApp app, List<Task<(ISteamApp, ApiResponse)>> apiResponseTasks)
     {
-        apiResponseTasks.Add(SteamApiClient.GetAppNameAsync(app));
+        apiResponseTasks.Add(SteamApiWrapper.GetAppNameAsync(app));
         Debug.Assert(apiResponseTasks.Count() <= ConcurrentDownloads);
         handledAppsTotal++;
+    }
+
+    private bool IsDistinctFailure(ApiResponse apiResponse)
+    {
+        if (apiResponse.ResponseState != ResponseState.CancelAll)
+        {
+            throw new ArgumentException($"ApiResponse did not represent failure but '{apiResponse.ResponseState}'");
+        }
+
+        if (apiResponse.TimeStamp > distinctFailureTime + FailureDelay)
+        {
+            distinctFailureTime = DateTime.Now;
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /// <summary>
+    /// If at least <see cref="failureDelay"/> milliseconds have passed since the last distinct failure:
+    /// <list type="bullet">
+    /// <item>the current failure is deemed a new distinct failure</item>
+    /// <item><see cref="distinctFailureTime"/> is updated</item>
+    /// <item>stalls the current thread for <see cref="failureDelay"/> milliseconds</item>
+    /// </list>
+    /// </summary>
+    /// <param name="apiResponse"></param>
+    /// <exception cref="CancelRequestsException"></exception>
+    private async Task StallThrowIfRepeatedFailure(ApiResponse apiResponse)
+    {
+        if (!IsDistinctFailure(apiResponse))
+        {
+            return;
+        }
+
+        log.Information("distinct failure detected");
+        distinctFailureCount++;
+        if (distinctFailureCount >= DistinctFailureLimit)
+        {
+            throw new CancelRequestsException(
+                $"cancel request limit ({DistinctFailureLimit}) reached (network failure)");
+        }
+
+        await Task.Delay(FailureDelay);
     }
 }

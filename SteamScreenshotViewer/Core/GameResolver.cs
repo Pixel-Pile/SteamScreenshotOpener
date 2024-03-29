@@ -3,58 +3,94 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Serilog;
 using SteamScreenshotViewer.Model;
 
 namespace SteamScreenshotViewer.Core;
 
-public partial class GameResolver : ObservableObject
+public class GameResolver : ObservableObject
 {
-    //TODO inotify required for the collections? (would signal replacement of entire data structure)
+    private static ILogger log = Log.ForContext<GameResolver>();
 
-    public ObservableCollection<ResolvedSteamApp> ObservedResolvedApps { get; set; } = new();
-    public ObservableCollection<UnresolvedSteamApp> ObservedUnresolvedApps { get; set; } = new();
+    private ResolutionProgress? resolutionProgress;
+    public event Action? AutoResolveCompletedWithFailures;
+    public event Action? AutoResolveCompleted;
+    public event Action? NetworkFailed;
 
-    [ObservableProperty] private int totalAppCount;
-    [ObservableProperty] private double autoResolvingProgress;
+    public readonly ICollection<ResolvedSteamApp> ResolvedApps = new List<ResolvedSteamApp>();
+    public readonly ICollection<UnresolvedSteamApp> UnresolvedApps = new List<UnresolvedSteamApp>();
+    private readonly List<string> knownDuplicateNames = new();
 
-    public event Action? AutoResolveFinishedPartialSuccess;
-    public event Action? AutoResolveFinishedFullSuccess;
-    public event Action? AutoResolveFailed;
-
-    public ICollection<ResolvedSteamApp> ResolvedApps = new List<ResolvedSteamApp>();
-    public ICollection<UnresolvedSteamApp> UnresolvedApps = new List<UnresolvedSteamApp>();
-    private List<string> knownDuplicateNames = new();
-
+    /// <summary>
+    /// Has to be called before <see cref="SearchAndResolveApps"/>
+    /// to retrieve the instance of ResolutionProgress
+    /// that can be used to monitor the resolution progress of this GameResolver.
+    /// <br/>
+    /// Every call to this method replaces this GameResolver's ResolutionProgress instance
+    /// and returns the new instance,
+    /// effectively resetting this GameResolver.
+    /// </summary>
+    public ResolutionProgress ResetResolutionProgress()
+    {
+        knownDuplicateNames.Clear();
+        UnresolvedApps.Clear();
+        ResolvedApps.Clear();
+        resolutionProgress = new ResolutionProgress();
+        return resolutionProgress;
+    }
 
     private List<ISteamApp> SearchApps()
     {
-        string[] screenshotPaths = Directory.EnumerateDirectories(Config.Instance.ScreenshotBasePath).ToArray();
-        List<ISteamApp> apps = new(screenshotPaths.Count());
+        string[] screenshotPaths = Directory.EnumerateDirectories(Config.Instance.ScreenshotBasePath!).ToArray();
+        List<ISteamApp> apps = new(screenshotPaths.Length);
         foreach (string path in screenshotPaths)
         {
             string appId = GetAppIdFromScreenshotDirectoryPath(path);
             apps.Add(new SteamApp(appId, path + @"\screenshots"));
         }
 
-        TotalAppCount = apps.Count;
+        resolutionProgress!.TotalAppCount = apps.Count;
         return apps;
     }
 
     public async Task SearchAndResolveApps()
     {
+        _ = resolutionProgress
+            ?? throw new InvalidOperationException(
+                $"{nameof(ResetResolutionProgress)} must be called before {nameof(SearchAndResolveApps)}");
+
         List<ISteamApp> apps = SearchApps();
         ConcurrentDownloader concurrentDownloader = new ConcurrentDownloader(this, apps);
-        await concurrentDownloader.ResolveAppNames();
-        Thread.MemoryBarrier();
-        AutoResolveFinishedPartialSuccess?.Invoke();
-        if (UnresolvedApps.Count == 0)
+        try
         {
-            AutoResolveFinishedFullSuccess?.Invoke();
+            await concurrentDownloader.ResolveAppNames();
+        }
+        catch (CancelRequestsException e)
+        {
+            log.Warning("requests were cancelled");
+            NetworkFailed?.Invoke();
+            return;
+        }
+        finally
+        {
+            Cache.Instance.PostAndSerialize();
         }
 
-        Cache.Instance.PostAndSerialize();
+        if (UnresolvedApps.Count > 0)
+        {
+            AutoResolveCompletedWithFailures?.Invoke();
+            return;
+        }
+
+        if (ResolvedApps.Count == apps.Count)
+        {
+            AutoResolveCompleted?.Invoke();
+            return;
+        }
     }
+
 
     public bool TryResolveCached(ISteamApp app, ConcurrentDictionary<string, string> cachedNamesById)
     {
@@ -63,19 +99,11 @@ public partial class GameResolver : ObservableObject
             // cached
             ResolvedSteamApp resolvedApp = new ResolvedSteamApp(app, name);
             AddResolvedAppCandidate(resolvedApp, false);
-            // Console.WriteLine($"already cached: {resolvedApp}");
             return true;
         }
 
         return false;
     }
-
-    private void HandleUnresolvedApp(UnresolvedSteamApp unresolvedApp)
-    {
-        AddUnresolved(unresolvedApp);
-        // Console.WriteLine("could not resolve name for id: " + unresolvedApp.Id);
-    }
-
 
     private void HandleNewlyResolvedApp(ResolvedSteamApp resolvedApp)
     {
@@ -235,18 +263,28 @@ public partial class GameResolver : ObservableObject
         }
     }
 
-
     public void HandleApiResponse(ISteamApp app, ApiResponse response)
     {
-        if (!response.ContainsName)
+        switch (response.ResponseState)
         {
-            Debug.Assert(response.FailureCause != null);
-            HandleUnresolvedApp(new UnresolvedSteamApp(app, response.FailureCause!.Value, this));
-            return;
+            case ResponseState.Success:
+                HandleNewlyResolvedApp(new ResolvedSteamApp(app, response.Name!));
+                break;
+            case ResponseState.FailureSkipApp:
+                Debug.Assert(response.FailureCause != null);
+                AddUnresolved(new UnresolvedSteamApp(app, response.FailureCause!.Value, this));
+                break;
+            case ResponseState.CancelAll:
+                AddUnresolved(new UnresolvedSteamApp(app, response.FailureCause!.Value, this));
+                break;
+            case ResponseState.FailureRetryAppWithDifferentFilters:
+                log.Error(
+                    $"ResponseState was {ResponseState.FailureRetryAppWithDifferentFilters} in {nameof(HandleApiResponse)}");
+                Debug.Assert(false);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-
-        // name found
-        HandleNewlyResolvedApp(new ResolvedSteamApp(app, response.Name!));
     }
 
     private string GetAppIdFromScreenshotDirectoryPath(string directory)
@@ -261,43 +299,29 @@ public partial class GameResolver : ObservableObject
         return id;
     }
 
-    private void UpdateAutoResolveProgress()
-    {
-        AutoResolvingProgress =
-            ObservedResolvedApps.Count * 100 / (double)(TotalAppCount - ObservedUnresolvedApps.Count);
-    }
 
-    private void RemoveUnresolved(UnresolvedSteamApp unresolvedApp)
+    public void RemoveUnresolved(UnresolvedSteamApp unresolvedApp)
     {
         UnresolvedApps.Remove(unresolvedApp);
-        Application.Current.Dispatcher.Invoke(() => ObservedUnresolvedApps.Remove(unresolvedApp));
+        resolutionProgress!.UnresolvedAppCount--;
     }
 
-    private void AddUnresolved(UnresolvedSteamApp unresolvedApp)
+    public void AddUnresolved(UnresolvedSteamApp unresolvedApp)
     {
         UnresolvedApps.Add(unresolvedApp);
-        Application.Current.Dispatcher.Invoke(() => ObservedUnresolvedApps.Add(unresolvedApp));
+        resolutionProgress!.UnresolvedAppCount++;
     }
 
-    private void RemoveResolved(ResolvedSteamApp resolvedApp)
+    public void RemoveResolved(ResolvedSteamApp resolvedApp)
     {
         ResolvedApps.Remove(resolvedApp);
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            ObservedResolvedApps.Remove(resolvedApp);
-            UpdateAutoResolveProgress();
-        });
+        resolutionProgress!.ResolvedAppCount--;
     }
 
-
-    private void AddResolved(ResolvedSteamApp resolvedApp, bool addToCache)
+    public void AddResolved(ResolvedSteamApp resolvedApp, bool addToCache)
     {
         ResolvedApps.Add(resolvedApp);
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            ObservedResolvedApps.Add(resolvedApp);
-            UpdateAutoResolveProgress();
-        });
+        resolutionProgress!.ResolvedAppCount++;
         if (addToCache)
         {
             if (!Cache.Instance.NamesByAppId.TryAdd(resolvedApp.Id, resolvedApp.Name))
@@ -305,42 +329,5 @@ public partial class GameResolver : ObservableObject
                 throw new InvalidOperationException("attempted to overwrite name entry in cache");
             }
         }
-    }
-
-    public bool AttemptManualResolve(UnresolvedSteamApp unresolvedApp)
-    {
-        switch (unresolvedApp.NameCandidateValid)
-        {
-            case true:
-                ResolvedSteamApp resolvedApp = new ResolvedSteamApp(unresolvedApp, unresolvedApp.CleanedNameCandidate);
-                RemoveUnresolved(unresolvedApp);
-                AddResolved(resolvedApp, true);
-                if (UnresolvedApps.Count == 0)
-                {
-                    Cache.Instance.PostAndSerialize();
-                    AutoResolveFinishedFullSuccess?.Invoke();
-                }
-
-                return true;
-            case false:
-                // different duplicate handling from AddResolvedAppCandidate
-                // (existing resolved app with same name is not invalidated
-                // but resolving this app is denied)
-                return false;
-            case null:
-                throw new InvalidOperationException(
-                    $"{nameof(UnresolvedSteamApp.NameCandidateValid)} was null");
-        }
-    }
-
-    public void ResolveAppIfNameCandidateValid(UnresolvedSteamApp unresolvedApp)
-    {
-        // null or false
-        if (unresolvedApp.NameCandidateValid != true)
-        {
-            return;
-        }
-
-        AttemptManualResolve(unresolvedApp);
     }
 }

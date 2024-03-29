@@ -13,28 +13,31 @@
         <ApplicationIcon>screenshotViewer.ico</ApplicationIcon>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Page Update="Themes\Generic.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <XamlRuntime>Wpf</XamlRuntime>
-        <SubType>Designer</SubType>
-      </Page>
-      <Page Update="Windows\MainWindow.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <XamlRuntime>Wpf</XamlRuntime>
-        <SubType>Designer</SubType>
-      </Page>
-      <Page Update="Windows\CrashWindow.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <XamlRuntime>Wpf</XamlRuntime>
-        <SubType>Designer</SubType>
-      </Page>
-    </ItemGroup>
+<!--    <ItemGroup>-->
+<!--      <Page Update="Themes\Generic.xaml">-->
+<!--        <Generator>MSBuild:Compile</Generator>-->
+<!--        <XamlRuntime>Wpf</XamlRuntime>-->
+<!--        <SubType>Designer</SubType>-->
+<!--      </Page>-->
+<!--      <Page Update="Windows\MainWindow.xaml">-->
+<!--        <Generator>MSBuild:Compile</Generator>-->
+<!--        <XamlRuntime>Wpf</XamlRuntime>-->
+<!--        <SubType>Designer</SubType>-->
+<!--      </Page>-->
+<!--      <Page Update="Windows\CrashWindow.xaml">-->
+<!--        <Generator>MSBuild:Compile</Generator>-->
+<!--        <XamlRuntime>Wpf</XamlRuntime>-->
+<!--        <SubType>Designer</SubType>-->
+<!--      </Page>-->
+<!--    </ItemGroup>-->
 
     <ItemGroup>
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
       <PackageReference Include="MaterialDesignThemes" Version="5.0.0" />
       <PackageReference Include="Serilog" Version="3.1.1" />
+      <PackageReference Include="Serilog.Enrichers.Context" Version="4.6.5" />
+      <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+      <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
       <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
       <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     </ItemGroup>

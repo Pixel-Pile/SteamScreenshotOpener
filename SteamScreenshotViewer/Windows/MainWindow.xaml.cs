@@ -6,7 +6,7 @@ using MaterialDesignThemes.Wpf;
 using Serilog;
 using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Core;
-using SteamScreenshotViewer.Helper;
+using SteamScreenshotViewer.Model;
 using SteamScreenshotViewer.Views;
 
 namespace SteamScreenshotViewer.Windows;
@@ -20,23 +20,23 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        conductor.PromptForBasePath += HandlePromptForBasePath;
+        conductor.PromptForScreenshotPath += HandlePromptForScreenshotPath;
         conductor.AutoResolveStarted += HandleAutoResolveStarted;
-        conductor.AutoResolveFinishedPartialSuccess += HandleAutoResolveFinishedPartialSuccess;
-        conductor.AutoResolveFinishedFullSuccess += HandleAutoResolveFinishedFullSuccess;
-        conductor.AutoResolveFailed += HandleAutoResolveFailed;
+        conductor.ResolveManually += HandleResolveManually;
+        conductor.AutoResolveCompleted += HandleAutoResolveCompleted;
+        conductor.NetworkFailed += HandleNetworkFailed;
         LoadThemeSpecifiedByConfig();
         InitializeComponent();
         conductor.Start();
     }
 
-
     [ObservableProperty] private TopLevelView currentView;
     [ObservableProperty] private bool isDarkMode;
+    private Action<string> basePathSetCallback;
 
-
-    private void HandlePromptForBasePath()
+    private void HandlePromptForScreenshotPath(object? sender, PromptForScreenshotPathEventArgs e)
     {
+        this.basePathSetCallback = e.SetScreenshotPathCallback;
         DisplayView(View.BasePathDialog);
     }
 
@@ -45,17 +45,18 @@ public partial class MainWindow : Window
         DisplayView(View.Loading);
     }
 
-    private void HandleAutoResolveFinishedPartialSuccess()
+    private void HandleResolveManually()
     {
         DisplayView(View.UnresolvedApps);
     }
 
-    private void HandleAutoResolveFinishedFullSuccess()
+
+    private void HandleAutoResolveCompleted()
     {
         DisplayView(View.Apps);
     }
 
-    private void HandleAutoResolveFailed()
+    private void HandleNetworkFailed()
     {
         DisplayView(View.NetworkFailure);
     }
@@ -63,7 +64,7 @@ public partial class MainWindow : Window
     private void DisplayView(View view)
     {
         log.Information("enqueing view loading for " + view);
-        Application.Current.Dispatcher.BeginInvoke(() => DisplayViewOnSameThread(view));
+        Application.Current.Dispatcher.Invoke(() => DisplayViewOnSameThread(view));
     }
 
     private void DisplayViewOnSameThread(View view)
@@ -96,7 +97,7 @@ public partial class MainWindow : Window
     {
         ViewBasePathDialog basePathDialog = new()
         {
-            SubmitButtonCommand = new RelayCommand<string>(conductor.HandleGameSpecificPathSubmitted!)
+            SubmitButtonCommand = new RelayCommand<string>(basePathSetCallback!)
         };
         CurrentView = basePathDialog;
     }

@@ -46,6 +46,7 @@ public class SerializedSingletonRegistry
     /// <returns></returns>
     public static bool TryGetInstance<T>([MaybeNullWhen(false)] out T instance) where T : class
     {
+        log.Debug($"attempting to load instance for type {typeof(T).Name}");
         lock (_locksByType[typeof(T)]) // prevent multiple instantiiation of type T by concurrent access
         {
             string path;
@@ -82,7 +83,7 @@ public class SerializedSingletonRegistry
 
     public static void Post<T>(T obj, bool allowAlreadyInstantiated = false)
     {
-        log.Information($"posting new instance for type {typeof(T).Name}");
+        log.Debug($"posting new instance for type {typeof(T).Name}");
         _ = obj ?? throw new NullReferenceException("null is not a valid singleton instance");
 
         lock (_locksByType[typeof(T)]) // prevent concurrent serialization of same type
@@ -119,7 +120,7 @@ public class SerializedSingletonRegistry
 
     private static T Deserialize<T>(string path)
     {
-        log.Information($"deserializing instance of type {typeof(T).Name}");
+        log.Debug($"deserializing instance of type {typeof(T).Name}");
 
         if (!Path.Exists(path))
         {
@@ -133,7 +134,7 @@ public class SerializedSingletonRegistry
 
     private static void Serialize<T>(string path, T obj)
     {
-        log.Information($"serializing instance of type {typeof(T).Name}");
+        log.Debug($"serializing instance of type {typeof(T).Name}");
 
         // create dir if missing
         string directoryPath = path.Substring(0, path.LastIndexOf("/"));

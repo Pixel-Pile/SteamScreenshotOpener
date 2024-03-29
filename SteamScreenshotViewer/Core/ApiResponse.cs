@@ -2,36 +2,68 @@
 
 namespace SteamScreenshotViewer.Core;
 
+public enum ResponseState
+{
+    InvalidEnumValue = 0,
+    Success,
+    FailureSkipApp,
+    FailureRetryAppWithDifferentFilters,
+    CancelAll
+}
+
 public class ApiResponse
 {
-    private static ApiResponse _retryReponse = new ApiResponse(false, null, null, true);
-
-    private ApiResponse(bool containsName, string? name, FailureCause? failureCause, bool shouldRetry)
+    private class ApiResponseCore
     {
-        ContainsName = containsName;
-        Name = name;
-        FailureCause = failureCause;
-        ShouldRetry = shouldRetry;
+        internal ApiResponseCore(ResponseState responseState, string? name, FailureCause? failureCause)
+        {
+            Name = name;
+            FailureCause = failureCause;
+            ResponseState = responseState;
+        }
+
+        public ResponseState ResponseState { get; }
+        public FailureCause? FailureCause { get; }
+        public string? Name { get; }
     }
+
+    private static readonly ApiResponseCore _retryReponse =
+        new(ResponseState.FailureRetryAppWithDifferentFilters, null, null);
+
+    private static readonly ApiResponseCore _cancelAllResponse =
+        new(ResponseState.CancelAll, null, Model.FailureCause.Network);
+
+    private readonly ApiResponseCore core;
+
+    private ApiResponse(ApiResponseCore core)
+    {
+        this.core = core;
+        TimeStamp = DateTime.Now;
+    }
+
 
     public static ApiResponse Success(string name)
     {
-        return new ApiResponse(true, name, null, false);
+        return new ApiResponse(new ApiResponseCore(ResponseState.Success, name, null));
     }
 
-    public static ApiResponse Failure(FailureCause failureCause)
+    public static ApiResponse RetryAppWithDifferentFilters()
     {
-        return new ApiResponse(false, null, failureCause, false);
+        return new ApiResponse(_retryReponse);
     }
 
-    public static ApiResponse Retry()
+    public static ApiResponse SkipApp(FailureCause failureCause)
     {
-        return _retryReponse;
+        return new ApiResponse(new ApiResponseCore(ResponseState.FailureSkipApp, null, failureCause));
     }
 
-    public bool ContainsName { get; }
-    public string? Name { get; }
-    public FailureCause? FailureCause { get; }
+    public static ApiResponse CancelAll()
+    {
+        return new ApiResponse(_cancelAllResponse);
+    }
 
-    public bool ShouldRetry { get; }
+    public DateTime TimeStamp { get; }
+    public ResponseState ResponseState => core.ResponseState;
+    public FailureCause? FailureCause => core.FailureCause;
+    public string? Name => core.Name;
 }

@@ -7,9 +7,9 @@ using SteamScreenshotViewer.Model;
 
 namespace SteamScreenshotViewer.Core;
 
-public static partial class SteamApiClient
+public static partial class SteamApiWrapper
 {
-    private static ILogger log = Log.ForContext(typeof(SteamApiClient));
+    private static ILogger log = Log.ForContext(typeof(SteamApiWrapper));
 
     private static HttpClient httpClient = new();
 
@@ -96,12 +96,13 @@ public static partial class SteamApiClient
     {
         ApiResponse response = await TryGetAppNameFromPackages(appId);
 
-        if (response.ShouldRetry)
+        if (response.ResponseState == ResponseState.FailureRetryAppWithDifferentFilters)
         {
             // log.Information("attempting to resolve using filters=basic: " + appId);
             response = await TryGetAppNameFromBasic(appId);
         }
 
+        // response state is Success, FailureSkipApp or CancelAll
         return response;
     }
 
@@ -130,7 +131,7 @@ public static partial class SteamApiClient
             {
                 // Success=false -> steamapi does not know that app id anymore
                 // --> retrying with different filters makes no sense
-                return ApiResponse.Failure(FailureCause.SteamApi);
+                return ApiResponse.SkipApp(FailureCause.SteamApi);
             }
 
             JsonArray packageGroups = ((JsonArray?)dataNode["package_groups"])
@@ -141,7 +142,7 @@ public static partial class SteamApiClient
                 // no package options -> app free or no longer sold on steam
                 // success was true meaning api does still have data on that id
                 // -> retry with different filter
-                return ApiResponse.Retry();
+                return ApiResponse.RetryAppWithDifferentFilters();
             }
 
             JsonNode firstPackage = packageGroups[0]
@@ -152,17 +153,17 @@ public static partial class SteamApiClient
 
             if (packageName.ToString() != "default")
             {
-                return ApiResponse.Retry();
+                return ApiResponse.RetryAppWithDifferentFilters();
             }
 
             string packageTitle = firstPackage["title"]?.ToString()
-                                        ?? throw new NullReferenceException(
-                                            "first package group did not contain title node");
+                                  ?? throw new NullReferenceException(
+                                      "first package group did not contain title node");
             Match appTitleMatch = ExtractNameFromPackageTitleRegex().Match(packageTitle);
             if (!appTitleMatch.Success)
             {
                 // retry with different filter
-                return ApiResponse.Retry();
+                return ApiResponse.RetryAppWithDifferentFilters();
             }
 
             return ApiResponse.Success(appTitleMatch.Groups[1].Value);
@@ -171,14 +172,15 @@ public static partial class SteamApiClient
         {
             // most likely failed to parse response json
             // -> retry with different filter
-            log.Warning(e, $"failed to resolve app '{appId}'");
-            return ApiResponse.Retry();
+            log.Debug(e, $"failed to resolve app '{appId}'");
+            return ApiResponse.RetryAppWithDifferentFilters();
         }
         catch (HttpRequestException e)
         {
             // network issues
-            log.Warning(e, $"failed to resolve app '{appId}'");
-            return ApiResponse.Failure(FailureCause.Network);
+            log.Debug( $"failed to resolve app '{appId}'");
+            // log.Warning(e, $"failed to resolve app '{appId}'");
+            return ApiResponse.CancelAll();
         }
     }
 
@@ -190,7 +192,7 @@ public static partial class SteamApiClient
             if (!TryGetDataNodeIfSuccess(response, appId, out JsonNode? dataNode))
             {
                 // response contains success = "false"
-                return ApiResponse.Failure(FailureCause.SteamApi);
+                return ApiResponse.SkipApp(FailureCause.SteamApi);
             }
 
             string name = dataNode["name"]?.ToString()
@@ -201,13 +203,14 @@ public static partial class SteamApiClient
         {
             // most likely failed to parse response json
             log.Warning(e, $"failed to resolve app '{appId}'");
-            return ApiResponse.Failure(FailureCause.SteamApi);
+            return ApiResponse.SkipApp(FailureCause.SteamApi);
         }
         catch (HttpRequestException e)
         {
             // network issues
-            log.Warning(e, $"failed to resolve app '{appId}'");
-            return ApiResponse.Failure(FailureCause.Network);
+            log.Warning( $"failed to resolve app '{appId}'");
+            // log.Warning(e, $"failed to resolve app '{appId}'");
+            return ApiResponse.CancelAll();
         }
     }
 

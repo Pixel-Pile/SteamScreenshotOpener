@@ -1,7 +1,10 @@
-﻿namespace SteamScreenshotViewer.Helper;
+﻿using Serilog;
+
+namespace SteamScreenshotViewer.Helper;
 
 public static class TaskHelper
 {
+    private static ILogger log = Log.ForContext(typeof(TaskHelper));
     public static event EventHandler<UnobservedTaskExceptionEventArgs>? UnobservedTaskException;
 
     public static void Run(Action action)
@@ -11,15 +14,13 @@ public static class TaskHelper
 
     public static void Run(Func<Task> action)
     {
-        Task.Run(action).ContinueWith(HandleExceptions);
+        Task.Run(action).ContinueWith(HandleExceptions, TaskContinuationOptions.OnlyOnFaulted);
     }
 
     private static void HandleExceptions(Task completedTask)
     {
-        if (completedTask.IsFaulted)
-        {
-            NonNull.InvokeEvent(UnobservedTaskException,
-                new UnobservedTaskExceptionEventArgs(completedTask.Exception));
-        }
+        log.Warning("a task faulted due to " + (completedTask.Exception!.GetType()));
+        NonNull.InvokeEvent(UnobservedTaskException,
+            new UnobservedTaskExceptionEventArgs(completedTask.Exception));
     }
 }

@@ -4,7 +4,6 @@
                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                    xmlns:local="clr-namespace:SteamScreenshotViewer.Views"
-                   xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
                    xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code"
                    mc:Ignorable="d" Width="750">
 
@@ -19,17 +18,17 @@
         <TextBlock HorizontalAlignment="Center">
             <Run Text="Resolving App Names:" />
             <Run
-                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay,Path=Conductor.ObservedResolvedApps.Count}" />
+                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay,Path=Conductor.ResolutionProgress.ResolvedAppCount}" />
             <Run Text="/" />
             <Run
-                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay,Path=Conductor.TotalAppCount}" />
+                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay,Path=Conductor.ResolutionProgress.TotalAppCount}" />
         </TextBlock>
         <ProgressBar Height="16" Margin="32,8" MinWidth="240"
-                     Value="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay,  Path=Conductor.AutoResolvingProgress}" />
+                     Value="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay,  Path=Conductor.ResolutionProgress.AutoResolvingProgress}" />
         <TextBlock HorizontalAlignment="Center">
             <Run Text="Failed Name Lookups: " />
             <Run
-                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay, Path=Conductor.ObservedUnresolvedApps.Count}" />
+                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay, Path=Conductor.ResolutionProgress.UnresolvedAppCount}" />
         </TextBlock>
     </StackPanel>
 </code:TopLevelView>

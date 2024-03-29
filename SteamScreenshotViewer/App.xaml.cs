@@ -1,6 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Threading;
 using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
+using Serilog.Templates;
+using Serilog.Templates.Themes;
 using SteamScreenshotViewer.Constants;
 using SteamScreenshotViewer.Helper;
 using SteamScreenshotViewer.Views;
@@ -23,13 +26,21 @@ public partial class App : Application
         InitializeComponent();
     }
 
+
+    private const string TemplateString =
+        "{@t:yyyy-MM-dd HH:mm:ss.fff} [{@l:u4}] [{ThreadId}] " +
+        "[{Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1)}] {@m}\r\n{@x}";
+
     private static void ConfigureLogger()
     {
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
+            .Enrich.WithThreadId()
             .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .WriteTo.File($"{Paths.LogsDir}/{FormatDateTimeForFileName(DateTime.Now)}.log")
+            .WriteTo.Console(new ExpressionTemplate(TemplateString,
+                theme: TemplateTheme.Code, applyThemeWhenOutputIsRedirected: true))
+            .WriteTo.File(new ExpressionTemplate(TemplateString),
+                $"{Paths.LogsDir}/{FormatDateTimeForFileName(DateTime.Now)}.log")
             .CreateLogger();
     }
 

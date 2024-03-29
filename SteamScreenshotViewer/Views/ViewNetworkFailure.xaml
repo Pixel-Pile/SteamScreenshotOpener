@@ -15,28 +15,59 @@
         <TextBlock>
             Could not connect to Steam's API.
             You might not be connected to the internet.
-            <LineBreak />
-            <LineBreak />
-            If your Steam library is large,
-            the app might have send too many requests and is temporarily "on cooldown".
-            For a few minutes, the API will ignore all requests made by this app.
-            <LineBreak />
-            <LineBreak />
-            The result of any request made so far has already been saved to disk.
-            No progress will be lost if you close the app now.
-            Name resolving will automatically resume next time you open the app.
         </TextBlock>
     </code:TopLevelView.Description>
 
-    <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
-            <Button Click="TestConnection">Test connection to Steam API</Button>
-            <TextBlock>
-                <Run Text="API response: " />
-                <Run
-                    Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewNetworkFailure}, Path=ApiResponse}" />
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Resolved Apps:  " />
+                <TextBlock Grid.Row="0" Grid.Column="1" TextAlignment="Right"
+                           Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewNetworkFailure}, 
+                Mode=OneWay, Path=Conductor.ResolutionProgress.ResolvedAppCount}">
+                </TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Failures:  " />
+                <TextBlock Grid.Row="1" Grid.Column="1" TextAlignment="Right"
+                           Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewNetworkFailure}, 
+                Mode=OneWay,Path=Conductor.ResolutionProgress.UnresolvedAppCount}" />
+            </Grid>
+            <TextBlock Margin="0,16,0,0" TextWrapping="Wrap">
+                If the number of resolved apps is large (multiple hundreds),
+                the app might have send too many requests and is temporarily "on cooldown".
+                For a few minutes, the API will ignore all requests made by this app.
+                <LineBreak />
+                <LineBreak />
+                The result of any request made so far has already been saved to disk.
+                No progress will be lost if you close the app now.
+                Name resolving will automatically resume next time you open the app.
             </TextBlock>
         </StackPanel>
-        <Button Click="RetryAutoResolve">Retry name resolution</Button>
-    </StackPanel>
+
+        <!-- DockPanel.Dock = Center -->
+        <StackPanel VerticalAlignment="Center" Margin="8,16,8,8" Orientation="Vertical">
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                <Button Click="TestConnection"
+                        VerticalAlignment="Center">
+                    Test connection to Steam API
+                </Button>
+                <TextBlock Margin="16,0,0,0" VerticalAlignment="Center">
+                    <Run Text="API response: " />
+                    <Run
+                        Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewNetworkFailure}, Path=ApiResponse}" />
+                </TextBlock>
+            </StackPanel>
+            <Button Margin="0,8,0,0" Click="RetryAutoResolve">Restart name resolution</Button>
+            <Button Margin="0,8,0,0" Click="ResolveManually">Resolve manually</Button>
+        </StackPanel>
+    </DockPanel>
 </code:TopLevelView>

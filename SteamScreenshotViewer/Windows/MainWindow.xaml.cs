@@ -20,7 +20,7 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        conductor.PromptForBasePath += HandlePromptForBasePath;
+        conductor.PromptForScreenshotPath += HandlePromptForScreenshotPath;
         conductor.AutoResolveStarted += HandleAutoResolveStarted;
         conductor.AutoResolveFinishedPartialSuccess += HandleAutoResolveFinishedPartialSuccess;
         conductor.AutoResolveFinishedFullSuccess += HandleAutoResolveFinishedFullSuccess;
@@ -30,13 +30,13 @@ public partial class MainWindow : Window
         conductor.Start();
     }
 
-
     [ObservableProperty] private TopLevelView currentView;
     [ObservableProperty] private bool isDarkMode;
+    private Action<string> basePathSetCallback;
 
-
-    private void HandlePromptForBasePath()
+    private void HandlePromptForScreenshotPath(object sender, PromptForScreenshotPathEventArgs e)
     {
+        this.basePathSetCallback = e.SetScreenshotPathCallback;
         DisplayView(View.BasePathDialog);
     }
 
@@ -96,7 +96,7 @@ public partial class MainWindow : Window
     {
         ViewBasePathDialog basePathDialog = new()
         {
-            SubmitButtonCommand = new RelayCommand<string>(conductor.HandleGameSpecificPathSubmitted!)
+            SubmitButtonCommand = new RelayCommand<string>(basePathSetCallback!)
         };
         CurrentView = basePathDialog;
     }

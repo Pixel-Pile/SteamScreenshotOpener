@@ -1,15 +1,26 @@
 ﻿using System.Collections.ObjectModel;
 using SteamScreenshotViewer.Helper;
 using SteamScreenshotViewer.Model;
-using SteamScreenshotViewer.Views;
 
 namespace SteamScreenshotViewer.Core;
+
+public class PromptForScreenshotPathEventArgs
+{
+    /// <summary>
+    /// The callback that should be invoked with the game-specific screenshot path.
+    /// </summary>
+    public readonly Action<string> SetScreenshotPathCallback;
+
+    public PromptForScreenshotPathEventArgs(Action<string> setScreenshotPathCallback)
+    {
+        SetScreenshotPathCallback = setScreenshotPathCallback;
+    }
+}
 
 public class Conductor
 {
     private GameResolver gameResolver = new();
-
-    public event Action? PromptForBasePath;
+    public event EventHandler<PromptForScreenshotPathEventArgs>? PromptForScreenshotPath;
     public event Action? AutoResolveStarted;
 
     #region redeclared gameResolver events
@@ -49,7 +60,8 @@ public class Conductor
         Config config = Config.Instance;
         if (config.ScreenshotBasePath is null)
         {
-            NonNull.InvokeEvent(PromptForBasePath);
+            NonNull.InvokeEvent(PromptForScreenshotPath,
+                new PromptForScreenshotPathEventArgs(HandleGameSpecificPathSubmitted));
             return;
         }
 
@@ -57,7 +69,7 @@ public class Conductor
         LoadAppList();
     }
 
-    public void HandleGameSpecificPathSubmitted(string gameSpecificScreenshotPath)
+    private void HandleGameSpecificPathSubmitted(string gameSpecificScreenshotPath)
     {
         Config config = Config.Instance;
         config.ScreenshotBasePath = PathHelper.ResolveScreenshotBasePath(gameSpecificScreenshotPath);

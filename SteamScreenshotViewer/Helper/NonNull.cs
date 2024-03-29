@@ -25,4 +25,16 @@ public static class NonNull
 
         action.Invoke(null, eventArgs);
     }
+    
+    public static void InvokeEvent<T>(Action<T>? action, T eventArgs,
+        [CallerArgumentExpression(nameof(action))] string? eventName = null)
+    {
+        if (action is null)
+        {
+            throw new NullReferenceException(
+                $"Attempted to raise event '{eventName}' but no handlers were subscribed.");
+        }
+    
+        action.Invoke(eventArgs);
+    }
 }

@@ -19,17 +19,17 @@
         <TextBlock HorizontalAlignment="Center">
             <Run Text="Resolving App Names:" />
             <Run
-                Text="{me:AncestorBinding Type=local:ViewLoadingScreen, Mode=OneWay,Path=GameResolver.ObservedResolvedApps.Count}" />
+                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay,Path=Conductor.ObservedResolvedApps.Count}" />
             <Run Text="/" />
             <Run
-                Text="{me:AncestorBinding Type=local:ViewLoadingScreen, Mode=OneWay,Path=GameResolver.TotalAppCount}" />
+                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay,Path=Conductor.TotalAppCount}" />
         </TextBlock>
         <ProgressBar Height="16" Margin="32,8" MinWidth="240"
-                     Value="{me:AncestorBinding Type=local:ViewLoadingScreen, Path=GameResolver.AutoResolvingProgress}" />
+                     Value="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay,  Path=Conductor.AutoResolvingProgress}" />
         <TextBlock HorizontalAlignment="Center">
             <Run Text="Failed Name Lookups: " />
             <Run
-                Text="{me:AncestorBinding Type=local:ViewLoadingScreen, Mode=OneWay, Path=GameResolver.ObservedUnresolvedApps.Count}" />
+                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewLoadingScreen}, Mode=OneWay, Path=Conductor.ObservedUnresolvedApps.Count}" />
         </TextBlock>
     </StackPanel>
 </code:TopLevelView>

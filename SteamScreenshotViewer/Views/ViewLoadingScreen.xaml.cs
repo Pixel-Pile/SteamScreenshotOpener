@@ -4,18 +4,19 @@ using System.Windows;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SteamScreenshotViewer.Controls.Code;
+using SteamScreenshotViewer.Core;
 using SteamScreenshotViewer.Model;
-using GameResolver = SteamScreenshotViewer.Helper.GameResolver;
+using GameResolver = SteamScreenshotViewer.Core.GameResolver;
 
 namespace SteamScreenshotViewer.Views;
 
 public partial class ViewLoadingScreen : TopLevelView
 {
-    public ViewLoadingScreen(GameResolver resolver)
+    public ViewLoadingScreen(Conductor conductor)
     {
-        GameResolver = resolver;
+        Conductor = conductor;
         InitializeComponent();
     }
 
-    [ObservableProperty] private GameResolver gameResolver;
+    [ObservableProperty] private Conductor conductor;
 }

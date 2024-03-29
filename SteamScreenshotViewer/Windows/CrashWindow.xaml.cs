@@ -1,20 +1,19 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Navigation;
 using Serilog;
 using SteamScreenshotViewer.Constants;
+using SteamScreenshotViewer.Core;
 using SteamScreenshotViewer.Helper;
 
-namespace SteamScreenshotViewer.Views;
+namespace SteamScreenshotViewer.Windows;
 
-public partial class CrashView : Window
+public partial class CrashWindow : Window
 {
-    private static ILogger log = Log.ForContext<CrashView>();
+    private static ILogger log = Log.ForContext<CrashWindow>();
 
-    public CrashView()
+    public CrashWindow()
     {
         InitializeComponent();
         this.Closing += CrashView_OnClosing;

@@ -1,0 +1,42 @@
+﻿<code:TopLevelView x:Class="SteamScreenshotViewer.Views.ViewNetworkFailure"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                   xmlns:local="clr-namespace:SteamScreenshotViewer.Views"
+                   xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code"
+                   xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
+                   mc:Ignorable="d"
+                   Width="750">
+    <code:TopLevelView.Title>
+        Network Failure
+    </code:TopLevelView.Title>
+    <code:TopLevelView.Description>
+        <TextBlock>
+            Could not connect to Steam's API.
+            You might not be connected to the internet.
+            <LineBreak />
+            <LineBreak />
+            If your Steam library is large,
+            the app might have send too many requests and is temporarily "on cooldown".
+            For a few minutes, the API will ignore all requests made by this app.
+            <LineBreak />
+            <LineBreak />
+            The result of any request made so far has already been saved to disk.
+            No progress will be lost if you close the app now.
+            Name resolving will automatically resume next time you open the app.
+        </TextBlock>
+    </code:TopLevelView.Description>
+
+    <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <Button Click="TestConnection">Test connection to Steam API</Button>
+            <TextBlock>
+                <Run Text="API response: " />
+                <Run
+                    Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewNetworkFailure}, Path=ApiResponse}" />
+            </TextBlock>
+        </StackPanel>
+        <Button Click="RetryAutoResolve">Retry name resolution</Button>
+    </StackPanel>
+</code:TopLevelView>

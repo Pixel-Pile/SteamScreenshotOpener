@@ -1,84 +1,90 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MaterialDesignColors;
 using MaterialDesignThemes.Wpf;
 using Serilog;
-using Serilog.Core;
 using SteamScreenshotViewer.Controls.Code;
+using SteamScreenshotViewer.Core;
 using SteamScreenshotViewer.Helper;
-using SteamScreenshotViewer.Model;
 using SteamScreenshotViewer.Views;
-using GameResolver = SteamScreenshotViewer.Helper.GameResolver;
 
-namespace SteamScreenshotViewer;
+namespace SteamScreenshotViewer.Windows;
 
-public enum View
-{
-    Error,
-    Apps,
-    BasePathDialog,
-    UnresolvedApps,
-    Loading
-}
-
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 [INotifyPropertyChanged]
 public partial class MainWindow : Window
 {
     private static ILogger log = Log.ForContext<MainWindow>();
 
+    private Conductor conductor = new();
+
     public MainWindow()
     {
-        gameResolver.AutoResolveFinished += HandleAutoResolveFinished;
-        gameResolver.AppsFullyResolved += HandleAppsFullyResolved;
+        conductor.PromptForBasePath += HandlePromptForBasePath;
+        conductor.AutoResolveStarted += HandleAutoResolveStarted;
+        conductor.AutoResolveFinishedPartialSuccess += HandleAutoResolveFinishedPartialSuccess;
+        conductor.AutoResolveFinishedFullSuccess += HandleAutoResolveFinishedFullSuccess;
+        conductor.AutoResolveFailed += HandleAutoResolveFailed;
         LoadThemeSpecifiedByConfig();
         InitializeComponent();
+        conductor.Start();
     }
 
-    private GameResolver gameResolver = new();
 
-    public static readonly DependencyProperty CurrentViewProperty = DependencyProperty.Register(
-        nameof(CurrentView), typeof(TopLevelView), typeof(MainWindow), new PropertyMetadata(default(TopLevelView)));
-
-    public TopLevelView CurrentView
-    {
-        get { return (TopLevelView)GetValue(CurrentViewProperty); }
-        set { SetValue(CurrentViewProperty, value); }
-    }
-
+    [ObservableProperty] private TopLevelView currentView;
     [ObservableProperty] private bool isDarkMode;
 
-    private void HandleAutoResolveFinished()
+
+    private void HandlePromptForBasePath()
     {
-        Application.Current.Dispatcher.Invoke(() => DisplayView(View.UnresolvedApps));
+        DisplayView(View.BasePathDialog);
     }
 
-    private void HandleAppsFullyResolved()
+    private void HandleAutoResolveStarted()
     {
-        Application.Current.Dispatcher.Invoke(() => DisplayView(View.Apps));
+        DisplayView(View.Loading);
     }
 
-    public void DisplayView(View view)
+    private void HandleAutoResolveFinishedPartialSuccess()
+    {
+        DisplayView(View.UnresolvedApps);
+    }
+
+    private void HandleAutoResolveFinishedFullSuccess()
+    {
+        DisplayView(View.Apps);
+    }
+
+    private void HandleAutoResolveFailed()
+    {
+        DisplayView(View.NetworkFailure);
+    }
+
+    private void DisplayView(View view)
+    {
+        log.Information("enqueing view loading for " + view);
+        Application.Current.Dispatcher.BeginInvoke(() => DisplayViewOnSameThread(view));
+    }
+
+    private void DisplayViewOnSameThread(View view)
     {
         log.Information("loading view " + view);
         switch (view)
         {
             case View.Apps:
-                LoadAppsView();
+                CurrentView = new ViewApps(conductor);
                 break;
             case View.BasePathDialog:
                 LoadBasePathDialogView();
                 break;
-            case View.UnresolvedApps:
-                LoadUnresolvedAppsView();
-                break;
             case View.Loading:
-                LoadLoadingScreenView();
+                CurrentView = new ViewLoadingScreen(conductor);
+                break;
+            case View.NetworkFailure:
+                CurrentView = new ViewNetworkFailure(conductor);
+                break;
+            case View.UnresolvedApps:
+                CurrentView = new ViewUnresolvedApps(conductor);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(view), view,
@@ -86,84 +92,13 @@ public partial class MainWindow : Window
         }
     }
 
-    private void LoadLoadingScreenView()
-    {
-        ViewLoadingScreen view = new(gameResolver);
-        CurrentView = view;
-    }
-
-    private void LoadUnresolvedAppsView()
-    {
-        ViewUnresolvedApps view = new(gameResolver);
-        CurrentView = view;
-    }
-
     private void LoadBasePathDialogView()
     {
-        ViewBasePathDialog basePathDialog = new(gameResolver);
-        basePathDialog.SubmitButtonCommand = new RelayCommand<string>(HandleGameSpecificPathSubmitted);
+        ViewBasePathDialog basePathDialog = new()
+        {
+            SubmitButtonCommand = new RelayCommand<string>(conductor.HandleGameSpecificPathSubmitted!)
+        };
         CurrentView = basePathDialog;
-    }
-
-    private void LoadAppsView()
-    {
-        ViewApps view = new(gameResolver);
-        CurrentView = view;
-    }
-
-    protected override void OnInitialized(EventArgs e)
-    {
-        base.OnInitialized(e);
-        Start();
-    }
-
-
-    private void HandleGameSpecificPathSubmitted(string gameSpecificScreenshotPath)
-    {
-        Config config = Config.Instance;
-        config.ScreenshotBasePath = ResolveBasePath(gameSpecificScreenshotPath);
-        config.PostAndSerialize();
-        DisplayView(View.Loading);
-        Task.Run(LoadAppList);
-    }
-
-    private void Start()
-    {
-        Config config = Config.Instance;
-        if (config.ScreenshotBasePath is null)
-        {
-            DisplayView(View.BasePathDialog);
-            return;
-        }
-
-        DisplayView(View.Loading);
-        Task.Run(LoadAppList);
-    }
-
-    private async Task LoadAppList()
-    {
-        await gameResolver.SearchAndResolveApps();
-    }
-
-
-    private string ResolveBasePath(string pathToASpecificGamesScreenshots)
-    {
-        char[] path = pathToASpecificGamesScreenshots.ToCharArray();
-        int separatorsFound = 0;
-        int i = path.Length - 1;
-        for (; i >= 0; i--)
-        {
-            if (path[i] == System.IO.Path.DirectorySeparatorChar)
-            {
-                separatorsFound++;
-                if (separatorsFound == 2)
-                {
-                    break;
-                }
-            }
-        }
-
-        return pathToASpecificGamesScreenshots.Substring(0, i);
     }
 
     private static void LoadTheme(bool isDarkMode)

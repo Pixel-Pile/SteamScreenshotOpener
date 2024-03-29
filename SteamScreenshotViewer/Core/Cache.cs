@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using Serilog;
 
-namespace SteamScreenshotViewer.Helper;
+namespace SteamScreenshotViewer.Core;
 
 public class Cache
 {

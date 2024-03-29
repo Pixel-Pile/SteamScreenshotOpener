@@ -8,9 +8,10 @@ using System.Windows.Navigation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
 using SteamScreenshotViewer.Controls.Code;
+using SteamScreenshotViewer.Core;
 using SteamScreenshotViewer.Helper;
 using SteamScreenshotViewer.Model;
-using GameResolver = SteamScreenshotViewer.Helper.GameResolver;
+using GameResolver = SteamScreenshotViewer.Core.GameResolver;
 
 namespace SteamScreenshotViewer.Views;
 
@@ -18,9 +19,14 @@ public partial class ViewApps : TopLevelView
 {
     private static ILogger log = Log.ForContext<ViewApps>();
 
-    public ViewApps(GameResolver resolver)
+    [ObservableProperty] private Conductor conductor;
+    [ObservableProperty] private string searchString;
+
+    private ICollectionView collectionView;
+
+    public ViewApps(Conductor conductor)
     {
-        GameResolver = resolver;
+        Conductor = conductor;
         this.Loaded += OnLoaded;
         InitializeComponent();
     }
@@ -33,16 +39,10 @@ public partial class ViewApps : TopLevelView
     protected override void OnInitialized(EventArgs e)
     {
         base.OnInitialized(e);
-        collectionView = CollectionViewSource.GetDefaultView(GameResolver.ObservedResolvedApps);
+        collectionView = CollectionViewSource.GetDefaultView(Conductor.ObservedResolvedApps);
         collectionView.SortDescriptions.Add(new SortDescription(nameof(ResolvedSteamApp.Name),
             ListSortDirection.Ascending));
     }
-
-    [ObservableProperty] private GameResolver gameResolver;
-
-    [ObservableProperty] private string searchString;
-
-    private ICollectionView collectionView;
 
 
     partial void OnSearchStringChanged(string value)

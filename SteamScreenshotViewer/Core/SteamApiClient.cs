@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using Serilog;
 using SteamScreenshotViewer.Model;
 
-namespace SteamScreenshotViewer.Helper;
+namespace SteamScreenshotViewer.Core;
 
 public static partial class SteamApiClient
 {

@@ -6,7 +6,7 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SteamScreenshotViewer.Model;
 
-namespace SteamScreenshotViewer.Helper;
+namespace SteamScreenshotViewer.Core;
 
 public partial class GameResolver : ObservableObject
 {
@@ -18,8 +18,9 @@ public partial class GameResolver : ObservableObject
     [ObservableProperty] private int totalAppCount;
     [ObservableProperty] private double autoResolvingProgress;
 
-    public event Action? AutoResolveFinished;
-    public event Action? AppsFullyResolved;
+    public event Action? AutoResolveFinishedPartialSuccess;
+    public event Action? AutoResolveFinishedFullSuccess;
+    public event Action? AutoResolveFailed;
 
     public ICollection<ResolvedSteamApp> ResolvedApps = new List<ResolvedSteamApp>();
     public ICollection<UnresolvedSteamApp> UnresolvedApps = new List<UnresolvedSteamApp>();
@@ -46,10 +47,10 @@ public partial class GameResolver : ObservableObject
         ConcurrentDownloader concurrentDownloader = new ConcurrentDownloader(this, apps);
         await concurrentDownloader.ResolveAppNames();
         Thread.MemoryBarrier();
-        AutoResolveFinished?.Invoke();
+        AutoResolveFinishedPartialSuccess?.Invoke();
         if (UnresolvedApps.Count == 0)
         {
-            AppsFullyResolved?.Invoke();
+            AutoResolveFinishedFullSuccess?.Invoke();
         }
 
         Cache.Instance.PostAndSerialize();
@@ -317,7 +318,7 @@ public partial class GameResolver : ObservableObject
                 if (UnresolvedApps.Count == 0)
                 {
                     Cache.Instance.PostAndSerialize();
-                    AppsFullyResolved?.Invoke();
+                    AutoResolveFinishedFullSuccess?.Invoke();
                 }
 
                 return true;

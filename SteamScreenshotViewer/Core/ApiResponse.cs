@@ -1,6 +1,6 @@
 ﻿using SteamScreenshotViewer.Model;
 
-namespace SteamScreenshotViewer.Helper;
+namespace SteamScreenshotViewer.Core;
 
 public class ApiResponse
 {

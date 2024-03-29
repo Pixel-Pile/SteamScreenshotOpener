@@ -5,22 +5,21 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SteamScreenshotViewer.Controls.Code;
+using SteamScreenshotViewer.Core;
 using SteamScreenshotViewer.Model;
-using GameResolver = SteamScreenshotViewer.Helper.GameResolver;
+using GameResolver = SteamScreenshotViewer.Core.GameResolver;
 
 namespace SteamScreenshotViewer.Views;
 
 public partial class ViewBasePathDialog : TopLevelView
 {
-    public ViewBasePathDialog(GameResolver resolver)
+    public ViewBasePathDialog()
     {
         SubmitButtonCommandInternal = new RelayCommand<string>(HandleSubmitCommand);
-        GameResolver = resolver;
         InitializeComponent();
     }
 
-    [ObservableProperty] private GameResolver gameResolver;
-
+    [ObservableProperty] private string errorMessage;
 
     public static readonly DependencyProperty SubmitButtonCommandInternalProperty = DependencyProperty.Register(
         nameof(SubmitButtonCommandInternal), typeof(RelayCommand<string>), typeof(ViewBasePathDialog),
@@ -41,8 +40,6 @@ public partial class ViewBasePathDialog : TopLevelView
         get { return (RelayCommand<string>)GetValue(SubmitButtonCommandProperty); }
         set { SetValue(SubmitButtonCommandProperty, value); }
     }
-
-    [ObservableProperty] private string errorMessage;
 
     private void HandleSubmitCommand(string gameSpecificScreenshotPath)
     {

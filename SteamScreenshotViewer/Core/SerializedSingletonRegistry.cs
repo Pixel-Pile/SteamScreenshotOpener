@@ -5,7 +5,7 @@ using System.Text.Json;
 using Serilog;
 using SteamScreenshotViewer.Constants;
 
-namespace SteamScreenshotViewer.Helper;
+namespace SteamScreenshotViewer.Core;
 
 public class SerializedSingletonRegistry
 {

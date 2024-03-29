@@ -55,7 +55,7 @@
                  Text="{Binding Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=SearchString}" />
         <ListView Grid.Row="2" PreviewKeyDown="ItemKeyDownHandler"
                   MouseDoubleClick="OnAppClick" x:Name="ListViewApps"
-                  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=GameResolver.ObservedResolvedApps}">
+                  ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=views:ViewApps}, Path=Conductor.ObservedResolvedApps}">
             <ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type model:ResolvedSteamApp}">
                     <TextBlock Text="{Binding Path=Name}" PreviewKeyDown="ItemKeyDownHandler" />

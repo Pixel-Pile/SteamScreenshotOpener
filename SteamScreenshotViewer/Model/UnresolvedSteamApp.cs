@@ -3,7 +3,10 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SteamScreenshotViewer.Core;
 using SteamScreenshotViewer.Helper;
+using GameResolver = SteamScreenshotViewer.Core.GameResolver;
+using SteamApiClient = SteamScreenshotViewer.Core.SteamApiClient;
 
 namespace SteamScreenshotViewer.Model;
 

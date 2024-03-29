@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace SteamScreenshotViewer.Helper;
+namespace SteamScreenshotViewer.Core;
 
 public static class ExplorerHelper
 {

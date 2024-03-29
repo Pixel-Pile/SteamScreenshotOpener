@@ -2,7 +2,9 @@
 using System.Windows.Threading;
 using Serilog;
 using SteamScreenshotViewer.Constants;
+using SteamScreenshotViewer.Helper;
 using SteamScreenshotViewer.Views;
+using SteamScreenshotViewer.Windows;
 
 namespace SteamScreenshotViewer;
 
@@ -14,9 +16,10 @@ public partial class App : Application
     {
         ConfigureLogger();
         log.Information("program started");
-        AppDomain.CurrentDomain.UnhandledException += OnUnhandledAppDomainException;
-        Dispatcher.UnhandledException += OnUnhandledDispatcherException;
-        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+        AppDomain.CurrentDomain.UnhandledException += HandleAppDomainException;
+        Dispatcher.UnhandledException += HandleDispatcherException;
+        TaskScheduler.UnobservedTaskException += HandleUnobservedTaskException;
+        TaskHelper.UnobservedTaskException += HandleUnobservedTaskException;
         InitializeComponent();
     }
 
@@ -40,12 +43,12 @@ public partial class App : Application
             if (!openedCrashWindow)
             {
                 openedCrashWindow = true;
-                new CrashView().ShowDialog();
+                new CrashWindow().ShowDialog();
             }
         });
     }
 
-    private static void OnUnhandledDispatcherException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    private static void HandleDispatcherException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         // this handler does not appear to be invoked ever? maybe debug side effects
         e.Handled = true;
@@ -54,7 +57,7 @@ public partial class App : Application
         ShowCrashWindow();
     }
 
-    private void OnUnhandledAppDomainException(object sender, UnhandledExceptionEventArgs e)
+    private void HandleAppDomainException(object sender, UnhandledExceptionEventArgs e)
     {
         // apparently also triggered on dispatcher exceptions? maybe debug side effects
         log.Fatal(e.ExceptionObject as Exception, "unhandled app domain exception");
@@ -62,7 +65,7 @@ public partial class App : Application
         ShowCrashWindow();
     }
 
-    private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    public static void HandleUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         log.Fatal(e.Exception, "unobserved task exception");
         e.SetObserved();

@@ -98,7 +98,7 @@ it.
 
 - [.Net (Core)](https://github.com/dotnet)
 - [WPF](https://github.com/dotnet/wpf)
-- [Community Toolkit (MVVM)](https://github.com/CommunityToolkit)
+- [Community Toolkit (MVVM)](https://github.com/CommunityToolkit/dotnet)
 - [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
 - [Serilog](https://github.com/serilog/serilog)
 

@@ -15,9 +15,9 @@ public class GameResolver : ObservableObject
     private static ILogger log = Log.ForContext<GameResolver>();
 
     private ResolutionProgress? resolutionProgress;
-    public event Action? AutoResolveFinishedPartialSuccess;
-    public event Action? AutoResolveFinishedFullSuccess;
-    public event Action? AutoResolveFailed;
+    public event Action? AutoResolveCompletedWithFailures;
+    public event Action? AutoResolveCompleted;
+    public event Action? NetworkFailed;
 
     public readonly ICollection<ResolvedSteamApp> ResolvedApps = new List<ResolvedSteamApp>();
     public readonly ICollection<UnresolvedSteamApp> UnresolvedApps = new List<UnresolvedSteamApp>();
@@ -70,7 +70,7 @@ public class GameResolver : ObservableObject
         catch (CancelRequestsException e)
         {
             log.Warning("requests were cancelled");
-            AutoResolveFailed?.Invoke();
+            NetworkFailed?.Invoke();
             return;
         }
         finally
@@ -80,13 +80,13 @@ public class GameResolver : ObservableObject
 
         if (UnresolvedApps.Count > 0)
         {
-            AutoResolveFinishedPartialSuccess?.Invoke();
+            AutoResolveCompletedWithFailures?.Invoke();
             return;
         }
 
         if (ResolvedApps.Count == apps.Count)
         {
-            AutoResolveFinishedFullSuccess?.Invoke();
+            AutoResolveCompleted?.Invoke();
             return;
         }
     }

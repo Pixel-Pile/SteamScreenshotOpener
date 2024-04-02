@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Serilog;
 using SteamScreenshotViewer.Helper;
 using SteamScreenshotViewer.Model;
 
@@ -23,38 +24,46 @@ public class PromptForScreenshotPathEventArgs
 [INotifyPropertyChanged]
 public partial class Conductor
 {
+    private static readonly ILogger log = Log.ForContext<Conductor>();
+    private const int NetworkFailureThreshold = 1; //TODO reset to 5
+
     private GameResolver gameResolver = new();
     public event EventHandler<PromptForScreenshotPathEventArgs>? PromptForScreenshotPath;
     public event Action? AutoResolveStarted;
+    public event Action? ResolveManually;
 
-    #region redeclared gameResolver events
+    #region pseudo-redeclared gameResolver events
 
-    public event Action? AutoResolveFinishedPartialSuccess
-    {
-        add { gameResolver.AutoResolveFinishedPartialSuccess += value; }
-        remove { gameResolver.AutoResolveFinishedPartialSuccess -= value; }
-    }
+    private event Action? _autoResolveCompleted;
 
-    private event Action? _autoResolveFinishedFullSuccess;
-
-    public event Action? AutoResolveFinishedFullSuccess
+    public event Action? AutoResolveCompleted
     {
         add
         {
-            _autoResolveFinishedFullSuccess += value;
-            gameResolver.AutoResolveFinishedFullSuccess += value;
+            _autoResolveCompleted += value;
+            gameResolver.AutoResolveCompleted += value;
         }
         remove
         {
-            _autoResolveFinishedFullSuccess -= value;
-            gameResolver.AutoResolveFinishedFullSuccess -= value;
+            _autoResolveCompleted -= value;
+            gameResolver.AutoResolveCompleted -= value;
         }
     }
 
-    public event Action? AutoResolveFailed
+    private event Action? _networkFailed;
+
+    public event Action? NetworkFailed
     {
-        add { gameResolver.AutoResolveFailed += value; }
-        remove { gameResolver.AutoResolveFailed -= value; }
+        add
+        {
+            _networkFailed += value;
+            gameResolver.NetworkFailed += value;
+        }
+        remove
+        {
+            _networkFailed -= value;
+            gameResolver.NetworkFailed -= value;
+        }
     }
 
     #endregion
@@ -70,11 +79,29 @@ public partial class Conductor
 
     public Conductor()
     {
-        gameResolver.AutoResolveFinishedPartialSuccess += () =>
+        gameResolver.AutoResolveCompletedWithFailures += HandleAutoResolveCompletedWithFailures;
+    }
+
+    private void HandleAutoResolveCompletedWithFailures()
+    {
+        int networkFailureCount = UnresolvedApps.Count(app => app.FailureCause == FailureCause.Network);
+
+        if (networkFailureCount >= NetworkFailureThreshold)
         {
-            this.ObservableUnresolvedApps =
-                new ObservableCollection<UnresolvedSteamApp>(gameResolver.UnresolvedApps);
-        };
+            log.Information($"exceeded {nameof(NetworkFailureThreshold)}, resolution deemed network failure");
+            NonNull.InvokeEvent(_networkFailed);
+        }
+        else
+        {
+            ResolveFailuresManually();
+        }
+    }
+
+    public void ResolveFailuresManually()
+    {
+        ObservableUnresolvedApps =
+            new ObservableCollection<UnresolvedSteamApp>(gameResolver.UnresolvedApps);
+        NonNull.InvokeEvent(ResolveManually);
     }
 
     public void Start()
@@ -129,7 +156,7 @@ public partial class Conductor
             if (UnresolvedApps.Count == 0)
             {
                 Cache.Instance.PostAndSerialize();
-                _autoResolveFinishedFullSuccess?.Invoke();
+                _autoResolveCompleted?.Invoke();
             }
         }
     }

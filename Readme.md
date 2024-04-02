@@ -1,8 +1,59 @@
-﻿# SteamScreenshotViewer
+﻿# SteamScreenshotOpener
 
-This is a small app to open the screenshot directories of any Steam application.
+This is a small app to quickly open the screenshot directory of any Steam application in file explorer.
 **Screenshots cannot be viewed directly inside the app.**
-(I originally planned to implement this, hence the name.)
+
+This repository was formerly named _SteamScreenshotViewer_. 
+I renamed it because I found it to be somewhat misleading.
+The .exe, solution and project files are still named SteamScreenshotViewer.
+
+## Why don't you use Steam's Screenshot Manager?
+
+Steam's built-in screenshot manager started crashing a lot for me after they overhauled the UI.
+And every time it crashes, it takes all of Steam down with it.
+Eventually, I grew tired of it and created this.
+
+## Why would I use this?
+
+You might be thinking:
+> "Why would I use this? 
+> I could just save the path to the directory steam stores all screenshots in and open it directly in file explorer."  
+
+And, well you could, but the screenshot folders are named by app id, not name.
+(e.g. your Terraria screenshots are stored inside a folder with the name `105600`).
+Unless you want to learn all those ids by heart you need a different solution.
+This app is one of these many possible solutions.
+
+Additionally, I made sure that using this app is fast and streamlined.
+When started, the search box will immediately be focused.
+Just start typing and hit enter as soon as the searched app hits the top of the search results.
+
+**The app has to complete a small setup when started for the very first time.**
+You have to provide it with the screenshot path of some game (so it knows where to look for other games' screenshots).
+Also, the app has to resolve the names of all apps you ever took a screenshot in when it is started for the first time.
+This can take a few seconds.
+
+![Main View](readme%20files/AppView.png)
+
+
+## Features
+
+- Light & Dark Mode
+  - enabled by [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
+- Automatic Name Resolution
+  - Steam puts all screenshots into directories called by app ID (e.g. your Terraria screenshots should be inside a folder with the name `105600`)
+  - this app automatically translates these IDs into names using Steam's API
+- Search
+  - as opposed to Steam's built-in Screenshot Manager, this app lets you search your screenshot directories by name 
+- Keyboard Navigation
+  - Press enter while searching to open the first screenshot directory
+  - Focus and navigate the list using arrow keys
+- Name Caching
+  - resolved app names are stored locally on your computer (`cache.json`)
+  - API requests are only made once for each app
+- Manual Resolution View
+  - separate view that opens if multiple apps have the same name or an app name cannot be resolved
+  - enables you to identify and manually resolve such apps
 
 ## Which .exe?
 
@@ -17,12 +68,8 @@ Every release contains 2 .exe files:
 ## State of this Repository
 
 The app is deemed feature-complete.
-I am not planning to add any major features.
-
-## Why does this exist?
-
-Steam's builtin screenshot manager started crashing a lot for me after they overhauled the UI.
-And every time it crashes, it takes all of Steam down with it.
+I plan on maintaining the app and providing bug-fixes.
+(Please open an issue if you found a bug.)
 
 ## How does it work?
 
@@ -37,7 +84,7 @@ Also steam's directory structure is very weird in general.
 For me, all screenshots are contained in subdirectories of a folder named `760`.
 No idea if that is true for everyone.
 
-After finding all screenshot folders the program tries to translate the folder names, which are app ids, to the apps'
+After finding all screenshot folders the program tries to translate the folder names, which are app IDs, to the apps'
 names.
 This is done using Steam's appdetails api (<https://store.steampowered.com/api/appdetails>).
 The filter `packages` is used to reduce network usage when possible.
@@ -61,13 +108,8 @@ Requests using `packages` however return as little as 500 Bytes to around 1 Kilo
 bandwidth usage in extreme cases.
 (Although probably more around 10 times on average.)
 
-Unfortunately, using `packages` has 2 major drawbacks.
-
-1. It can result in wrong names rarely.
-   This occurs if an app's first purchase option is not `Buy <app name>`.
-   An example for this is GTAV, whose name will be resolved as `Shark Cash Cards`.
-   To fix such issues, see [Troubleshooting](#Troubleshooting).
-2. It does not work for free apps. In such cases, a second request using `filters=basic` is done.
+Unfortunately, using `packages` does not work for free apps,
+which are resolved by starting a second request, using `filters=basic`.
 
 ## Troubleshooting
 
@@ -79,7 +121,7 @@ Start the app and it should prompt you to enter a path again.
 
 ### Wrong App Name
 
-If an app name is resolved incorrectly (e.g. GTAV is called "Shark Cash Cards")  you can edit `cache.json`.
+If an app name is resolved incorrectly you can edit `cache.json`.
 The file maps app ids to names.
 The file is located in a directory called `storage` next to the `.exe`.
 Close the app before editing `cache.json`.
@@ -90,7 +132,8 @@ If you want to delete all manually set names, delete the `cache.json` file entir
 ### Other Problems
 
 You're welcome to open an issue in this repository.
-_It might take a long time for me to reply, and not all issue will necessarily get fixed._
+_It might take a long time for me to reply._
+
 If you want to take things into your own hands, this project is using the MIT license - you can fork and freely develop
 it.
 

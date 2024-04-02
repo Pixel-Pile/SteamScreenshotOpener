@@ -1,6 +1,4 @@
-﻿using SteamScreenshotViewer.Model;
-
-namespace SteamScreenshotViewer;
+﻿namespace SteamScreenshotViewer.Model;
 
 public class SteamApp : ISteamApp
 {

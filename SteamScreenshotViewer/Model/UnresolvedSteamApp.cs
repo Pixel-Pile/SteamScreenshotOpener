@@ -48,9 +48,9 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     [ObservableProperty] private bool retrySteamApiCommandEnabled;
     private readonly bool inConstructor;
 
-    partial void OnNameCandidateChanged(string? oldValue, string newValue)
+    partial void OnNameCandidateChanged(string value)
     {
-        CleanedNameCandidate = StringHelper.RemoveDuplicateWhitespace(newValue);
+        CleanedNameCandidate = StringHelper.RemoveDuplicateWhitespace(value);
     }
 
     partial void OnCleanedNameCandidateChanged(string? oldValue, string newValue)

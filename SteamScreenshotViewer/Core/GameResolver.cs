@@ -67,7 +67,7 @@ public class GameResolver : ObservableObject
         {
             await concurrentDownloader.ResolveAppNames();
         }
-        catch (CancelRequestsException e)
+        catch (CancelRequestsException)
         {
             log.Warning("requests were cancelled");
             NetworkFailed?.Invoke();

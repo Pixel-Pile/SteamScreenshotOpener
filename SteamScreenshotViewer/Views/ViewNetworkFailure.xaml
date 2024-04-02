@@ -5,7 +5,6 @@
                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                    xmlns:local="clr-namespace:SteamScreenshotViewer.Views"
                    xmlns:code="clr-namespace:SteamScreenshotViewer.Controls.Code"
-                   xmlns:me="clr-namespace:SteamScreenshotViewer.MarkupExtensions"
                    mc:Ignorable="d"
                    Width="750">
     <code:TopLevelView.Title>
@@ -67,7 +66,11 @@
                 </TextBlock>
             </StackPanel>
             <Button Margin="0,8,0,0" Click="RetryAutoResolve">Restart name resolution</Button>
-            <Button Margin="0,8,0,0" Click="ResolveManually">Resolve manually</Button>
+            
+            <!-- manual resolve would require all apps to have failed;  -->
+            <!-- but name resolution is cancelled early on network failure  -->
+            <!-- meaning some apps might neither be resolved nor unresolved -->
+            <!-- <Button Margin="0,8,0,0" Click="ResolveManually">Resolve manually</Button> -->
         </StackPanel>
     </DockPanel>
 </code:TopLevelView>

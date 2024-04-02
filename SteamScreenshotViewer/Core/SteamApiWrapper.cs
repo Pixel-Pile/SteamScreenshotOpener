@@ -178,7 +178,7 @@ public static partial class SteamApiWrapper
         catch (HttpRequestException e)
         {
             // network issues
-            log.Debug( $"failed to resolve app '{appId}'");
+            log.Debug($"failed to resolve app '{appId}'");
             // log.Warning(e, $"failed to resolve app '{appId}'");
             return ApiResponse.CancelAll();
         }
@@ -208,7 +208,7 @@ public static partial class SteamApiWrapper
         catch (HttpRequestException e)
         {
             // network issues
-            log.Warning( $"failed to resolve app '{appId}'");
+            log.Warning($"failed to resolve app '{appId}'");
             // log.Warning(e, $"failed to resolve app '{appId}'");
             return ApiResponse.CancelAll();
         }
@@ -225,16 +225,13 @@ public static partial class SteamApiWrapper
     /// <exception cref="HttpRequestException">if any network related issue arises</exception>
     private static async Task<string> GetResponseString(string request)
     {
-        string? response = null;
         try
         {
-            response = await httpClient.GetStringAsync(request);
+            return await httpClient.GetStringAsync(request);
         }
         catch (TaskCanceledException timeout)
         {
             throw new HttpRequestException("request failed due to timeout", timeout);
         }
-
-        return response;
     }
 }

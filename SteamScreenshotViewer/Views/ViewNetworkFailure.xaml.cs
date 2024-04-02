@@ -37,8 +37,13 @@ public partial class ViewNetworkFailure : TopLevelView
         Conductor.RetryAutoResolve();
     }
 
-    private void ResolveManually(object sender, RoutedEventArgs e)
-    {
-        Conductor.ResolveFailuresManually();
-    }
+    // manual resolve would require all apps to have failed;  
+    //  but name resolution is cancelled early on network failure  
+    //  meaning some apps might neither be resolved nor unresolved 
+    // this could be fixed by simply failing all apps on cancellation
+    
+    // private void ResolveManually(object sender, RoutedEventArgs e)
+    // {
+    //     Conductor.ResolveFailuresManually();
+    // }
 }

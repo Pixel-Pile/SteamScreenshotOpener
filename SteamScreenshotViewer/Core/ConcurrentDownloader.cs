@@ -117,11 +117,11 @@ public class ConcurrentDownloader
 
 
     /// <summary>
-    /// If at least <see cref="failureDelay"/> milliseconds have passed since the last distinct failure:
+    /// If at least <see cref="FailureDelay"/> milliseconds have passed since the last distinct failure:
     /// <list type="bullet">
     /// <item>the current failure is deemed a new distinct failure</item>
     /// <item><see cref="distinctFailureTime"/> is updated</item>
-    /// <item>stalls the current thread for <see cref="failureDelay"/> milliseconds</item>
+    /// <item>stalls the current thread for <see cref="FailureDelay"/> milliseconds</item>
     /// </list>
     /// </summary>
     /// <param name="apiResponse"></param>

@@ -40,12 +40,12 @@
                 <Run Text="Bugs:" />
                 <LineBreak />
                 <Run Text="This list should contain all apps that you have taken a screenshot in." />
-                <Run Text="If any apps are missing or have incorrect names see " />
+                <Run Text="If any apps are missing or have incorrect names see" />
                 <Hyperlink
                     NavigateUri="https://github.com/Pixel-Pile/SteamScreenshotViewer?tab=readme-ov-file#troubleshooting"
                     RequestNavigate="OpenHyperlink" Foreground="{StaticResource HyperlinkForeground}">
                     Troubleshooting
-                </Hyperlink>
+                </Hyperlink><Run Text="."/>
             </TextBlock>
 
         </Expander>

@@ -7,6 +7,7 @@ using Serilog;
 using SteamScreenshotViewer.Controls.Code;
 using SteamScreenshotViewer.Core;
 using SteamScreenshotViewer.Helper;
+using SteamScreenshotViewer.Model;
 using SteamScreenshotViewer.Views;
 
 namespace SteamScreenshotViewer.Windows;
@@ -15,6 +16,7 @@ namespace SteamScreenshotViewer.Windows;
 public partial class MainWindow : Window
 {
     private static ILogger log = Log.ForContext<MainWindow>();
+    private const int NetworkFailureThreshold = 5;
 
     private Conductor conductor = new();
 
@@ -34,7 +36,7 @@ public partial class MainWindow : Window
     [ObservableProperty] private bool isDarkMode;
     private Action<string> basePathSetCallback;
 
-    private void HandlePromptForScreenshotPath(object sender, PromptForScreenshotPathEventArgs e)
+    private void HandlePromptForScreenshotPath(object? sender, PromptForScreenshotPathEventArgs e)
     {
         this.basePathSetCallback = e.SetScreenshotPathCallback;
         DisplayView(View.BasePathDialog);
@@ -47,8 +49,19 @@ public partial class MainWindow : Window
 
     private void HandleAutoResolveFinishedPartialSuccess()
     {
-        DisplayView(View.UnresolvedApps);
+        int networkFailureCount = conductor.UnresolvedApps.Count(app => app.FailureCause == FailureCause.Network);
+
+        if (networkFailureCount <= NetworkFailureThreshold)
+        {
+            DisplayView(View.UnresolvedApps);
+        }
+        else
+        {
+            log.Information($"exceeded {nameof(NetworkFailureThreshold)}, resolution deemed network failure");
+            DisplayView(View.NetworkFailure);
+        }
     }
+
 
     private void HandleAutoResolveFinishedFullSuccess()
     {
@@ -63,7 +76,7 @@ public partial class MainWindow : Window
     private void DisplayView(View view)
     {
         log.Information("enqueing view loading for " + view);
-        Application.Current.Dispatcher.BeginInvoke(() => DisplayViewOnSameThread(view));
+        Application.Current.Dispatcher.Invoke(() => DisplayViewOnSameThread(view));
     }
 
     private void DisplayViewOnSameThread(View view)

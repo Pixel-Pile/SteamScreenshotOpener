@@ -7,9 +7,9 @@ using SteamScreenshotViewer.Model;
 
 namespace SteamScreenshotViewer.Core;
 
-public static partial class SteamApiClient
+public static partial class SteamApiWrapper
 {
-    private static ILogger log = Log.ForContext(typeof(SteamApiClient));
+    private static ILogger log = Log.ForContext(typeof(SteamApiWrapper));
 
     private static HttpClient httpClient = new();
 
@@ -96,7 +96,7 @@ public static partial class SteamApiClient
     {
         ApiResponse response = await TryGetAppNameFromPackages(appId);
 
-        if (response.ResponseState == ResponseState.FailureRetryApp)
+        if (response.ResponseState == ResponseState.FailureRetryAppWithDifferentFilters)
         {
             // log.Information("attempting to resolve using filters=basic: " + appId);
             response = await TryGetAppNameFromBasic(appId);
@@ -142,7 +142,7 @@ public static partial class SteamApiClient
                 // no package options -> app free or no longer sold on steam
                 // success was true meaning api does still have data on that id
                 // -> retry with different filter
-                return ApiResponse.RetryApp();
+                return ApiResponse.RetryAppWithDifferentFilters();
             }
 
             JsonNode firstPackage = packageGroups[0]
@@ -153,7 +153,7 @@ public static partial class SteamApiClient
 
             if (packageName.ToString() != "default")
             {
-                return ApiResponse.RetryApp();
+                return ApiResponse.RetryAppWithDifferentFilters();
             }
 
             string packageTitle = firstPackage["title"]?.ToString()
@@ -163,7 +163,7 @@ public static partial class SteamApiClient
             if (!appTitleMatch.Success)
             {
                 // retry with different filter
-                return ApiResponse.RetryApp();
+                return ApiResponse.RetryAppWithDifferentFilters();
             }
 
             return ApiResponse.Success(appTitleMatch.Groups[1].Value);
@@ -172,13 +172,13 @@ public static partial class SteamApiClient
         {
             // most likely failed to parse response json
             // -> retry with different filter
-            log.Warning(e, $"failed to resolve app '{appId}'");
-            return ApiResponse.RetryApp();
+            log.Debug(e, $"failed to resolve app '{appId}'");
+            return ApiResponse.RetryAppWithDifferentFilters();
         }
         catch (HttpRequestException e)
         {
             // network issues
-            log.Warning( $"failed to resolve app '{appId}'");
+            log.Debug( $"failed to resolve app '{appId}'");
             // log.Warning(e, $"failed to resolve app '{appId}'");
             return ApiResponse.CancelAll();
         }

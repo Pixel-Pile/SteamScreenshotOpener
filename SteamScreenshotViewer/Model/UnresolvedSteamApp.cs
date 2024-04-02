@@ -6,13 +6,12 @@ using CommunityToolkit.Mvvm.Input;
 using SteamScreenshotViewer.Core;
 using SteamScreenshotViewer.Helper;
 using GameResolver = SteamScreenshotViewer.Core.GameResolver;
-using SteamApiClient = SteamScreenshotViewer.Core.SteamApiClient;
 
 namespace SteamScreenshotViewer.Model;
 
 public enum FailureCause
 {
-    Error,
+    InvalidEnumValue = 0,
     Network,
     SteamApi,
     DuplicateName
@@ -98,7 +97,7 @@ public partial class UnresolvedSteamApp : SteamAppExtension
     private async Task RetrySteamApi()
     {
         //FIXME
-        ApiResponse response = await SteamApiClient.GetAppNameAsync(Id);
+        ApiResponse response = await SteamApiWrapper.GetAppNameAsync(Id);
         if (response.ResponseState == ResponseState.Success)
         {
             NameCandidate = response.Name!;

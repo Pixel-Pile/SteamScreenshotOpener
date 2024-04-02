@@ -19,7 +19,7 @@
         <TextBlock>
             <Run Text="Failed to resolve names for" />
             <Run
-                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Mode=OneWay, Path=Conductor.ObservedUnresolvedApps.Count}" />
+                Text="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Mode=OneWay, Path=Conductor.ObservableUnresolvedApps.Count}" />
             <Run Text="apps automatically." />
             <LineBreak />
             <Run
@@ -35,7 +35,7 @@
         <ListView
             KeyboardNavigation.TabNavigation="Continue"
             FontSize="{StaticResource GlobalFontSize}"
-            ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Path=Conductor.ObservedUnresolvedApps}">
+            ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=local:ViewUnresolvedApps}, Path=Conductor.ObservableUnresolvedApps}">
             <ListView.Resources>
                 <!-- setting on listview/gridview directly is ignored see https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit/issues/1220 -->
                 <Style x:Key="{x:Static GridView.GridViewScrollViewerStyleKey}"

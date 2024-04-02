@@ -39,7 +39,7 @@ public partial class ViewApps : TopLevelView
     protected override void OnInitialized(EventArgs e)
     {
         base.OnInitialized(e);
-        collectionView = CollectionViewSource.GetDefaultView(Conductor.ObservedResolvedApps);
+        collectionView = CollectionViewSource.GetDefaultView(Conductor.ResolvedApps);
         collectionView.SortDescriptions.Add(new SortDescription(nameof(ResolvedSteamApp.Name),
             ListSortDirection.Ascending));
     }

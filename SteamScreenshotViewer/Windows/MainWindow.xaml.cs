@@ -51,7 +51,7 @@ public partial class MainWindow : Window
     {
         int networkFailureCount = conductor.UnresolvedApps.Count(app => app.FailureCause == FailureCause.Network);
 
-        if (networkFailureCount <= NetworkFailureThreshold)
+        if (networkFailureCount < NetworkFailureThreshold)
         {
             DisplayView(View.UnresolvedApps);
         }

@@ -25,7 +25,7 @@ public class PromptForScreenshotPathEventArgs
 public partial class Conductor
 {
     private static readonly ILogger log = Log.ForContext<Conductor>();
-    private const int NetworkFailureThreshold = 1; //TODO reset to 5
+    private const int NetworkFailureThreshold = 5;
 
     private GameResolver gameResolver = new();
     public event EventHandler<PromptForScreenshotPathEventArgs>? PromptForScreenshotPath;

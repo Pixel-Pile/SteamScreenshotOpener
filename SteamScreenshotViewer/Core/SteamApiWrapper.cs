@@ -202,13 +202,13 @@ public static partial class SteamApiWrapper
         catch (NullReferenceException e)
         {
             // most likely failed to parse response json
-            log.Warning(e, $"failed to resolve app '{appId}'");
+            log.Debug(e, $"failed to resolve app '{appId}'");
             return ApiResponse.SkipApp(FailureCause.SteamApi);
         }
         catch (HttpRequestException e)
         {
             // network issues
-            log.Warning($"failed to resolve app '{appId}'");
+            log.Debug($"failed to resolve app '{appId}'");
             // log.Warning(e, $"failed to resolve app '{appId}'");
             return ApiResponse.CancelAll();
         }

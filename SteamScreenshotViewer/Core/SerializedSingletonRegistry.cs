@@ -46,7 +46,7 @@ public class SerializedSingletonRegistry
     /// <returns></returns>
     public static bool TryGetInstance<T>([MaybeNullWhen(false)] out T instance) where T : class
     {
-        log.Debug($"attempting to load instance for type {typeof(T).Name}");
+        // log.Debug($"attempting to load instance for type {typeof(T).Name}");
         lock (_locksByType[typeof(T)]) // prevent multiple instantiiation of type T by concurrent access
         {
             string path;

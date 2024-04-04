@@ -1,59 +1,45 @@
 ﻿# SteamScreenshotOpener
 
-This is a small app to quickly open the screenshot directory of any Steam application in file explorer.
+Quickly open the screenshot directory of any Steam application in file explorer.
 **Screenshots cannot be viewed directly inside the app.**
 
 This repository was formerly named _SteamScreenshotViewer_. 
 I renamed it because I found it to be somewhat misleading.
 The .exe, solution and project files are still named SteamScreenshotViewer.
 
-## Why don't you use Steam's Screenshot Manager?
-
-Steam's built-in screenshot manager started crashing a lot for me after they overhauled the UI.
-And every time it crashes, it takes all of Steam down with it.
-Eventually, I grew tired of it and created this.
-
-## Why would I use this?
-
-You might be thinking:
-> "Why would I use this? 
-> I could just save the path to the directory steam stores all screenshots in and open it directly in file explorer."  
-
-And, well you could, but the screenshot folders are named by app id, not name.
-(e.g. your Terraria screenshots are stored inside a folder with the name `105600`).
-Unless you want to learn all those ids by heart you need a different solution.
-This app is one of these many possible solutions.
-
-Additionally, I made sure that using this app is fast and streamlined.
-When started, the search box will immediately be focused.
-Just start typing and hit enter as soon as the searched app hits the top of the search results.
-
-**The app has to complete a small setup when started for the very first time.**
-You have to provide it with the screenshot path of some game (so it knows where to look for other games' screenshots).
-Also, the app has to resolve the names of all apps you ever took a screenshot in when it is started for the first time.
-This can take a few seconds.
-
 ![Main View](readme%20files/AppView.png)
-
 
 ## Features
 
+- Streamlined Search and Keyboard Navigation
+  - Screenshot directories can be searched by app name (which for some reason is not possible in Steam's built-in Screenshot Manager)
+  - Search box is automatically focused when program is started
+  - Press enter while typing to open the top list item (you can also use double-click)
+  - Focus and navigate the list using arrow keys
 - Light & Dark Mode
-  - enabled by [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
+  - Enabled by [Material Design in XAML](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)
 - Automatic Name Resolution
   - Steam puts all screenshots into directories called by app ID (e.g. your Terraria screenshots should be inside a folder with the name `105600`)
-  - this app automatically translates these IDs into names using Steam's API
-- Search
-  - as opposed to Steam's built-in Screenshot Manager, this app lets you search your screenshot directories by name 
-- Keyboard Navigation
-  - Press enter while searching to open the first screenshot directory
-  - Focus and navigate the list using arrow keys
-- Name Caching
-  - resolved app names are stored locally on your computer (`cache.json`)
-  - API requests are only made once for each app
+  - When started for the first time, the app automatically  translates all these ID's into names using Steam's API
+  - Multiple requests are started simultaneously to speed things up.
+    (For me, resolution rate is roughly 30-60 apps/second.)
+  - Resolved names are stored locally on your computer (in a file called `cache.json`).
+  Internet access is only required to resolve new apps.
+  Steam Screenshot Viewer checks for new apps every time it is started.
 - Manual Resolution View
-  - separate view that opens if multiple apps have the same name or an app name cannot be resolved
-  - enables you to identify and manually resolve such apps
+  - Separate view that opens if multiple apps have the same name or an app name cannot be resolved
+  - Enables you to identify and manually resolve such apps
+
+**The app has to complete a small setup when started for the very first time.**
+You have to provide it with the screenshot path of some game (so it knows where to look for other games' screenshots).
+The app then has to resolve the names of all apps you have ever taken a screenshot in when it is started for the first time.
+This can take a few seconds.
+
+## Why does this exist?
+
+Steam's built-in screenshot manager started crashing a lot for me after they overhauled the UI.
+And it took all of steam down with it on every crash.
+Eventually, I grew tired of it and created this application.
 
 ## Which .exe?
 
@@ -112,6 +98,14 @@ Unfortunately, using `packages` does not work for free apps,
 which are resolved by starting a second request, using `filters=basic`.
 
 ## Troubleshooting
+
+### Logs
+
+Logs can be found in a folder called `logs` next to the executable.
+A separate log is written every time the app is started.
+Log files are named by date and time of the app start,
+e.g. `2024-04-02_14-36-47.log` logs all events for an app run that started on the 2nd of april 2024 at 14:36:47.
+
 
 ### App List Empty
 
